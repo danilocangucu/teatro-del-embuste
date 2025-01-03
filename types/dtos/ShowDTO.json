@@ -1,0 +1,82 @@
+{
+  "id": "show-123",
+  "title": "Romeo and Juliet",
+
+  "tagline": "A timeless love story by William Shakespeare.",
+
+  "description": "Set in Verona, this classic tale follows the passionate and tragic love story of Romeo and Juliet, two young lovers from feuding families. Despite the odds, they fight for their love in a world filled with hatred and misunderstanding. This production breathes fresh life into Shakespeare's iconic masterpiece, blending powerful performances with stunning visual design. Perfect for both first-time theatergoers and seasoned enthusiasts.",
+
+  "mainImage": "https://example.com/images/romeo-and-juliet-main.jpg",
+  "additionalImages": [
+    "https://example.com/images/romeo-and-juliet-1.jpg",
+    "https://example.com/images/romeo-and-juliet-2.jpg"
+  ],
+  "importantNotice": "Please arrive 30 minutes early for bag checks.",
+  "durationMinutes": 120,
+  "startDate": "2024-01-10",
+  "endDate": "2024-01-20",
+
+  "technicalDetails": {
+    "company": "The Shakespeare Theatre Company",
+    "director": "Jane Doe",
+    "playwright": "William Shakespeare",
+    "cast": [
+      { "name": "John Smith", "role": "Romeo" },
+      { "name": "Emily Johnson", "role": "Juliet" }
+    ],
+    "productionTeam": [
+      { "role": "Lighting Designer", "name": "Alice Brown" },
+      { "role": "Sound Designer", "name": "Bob White" }
+    ],
+    "genre": "Tragedy",
+    "language": "English"
+  },
+
+  "reviews": [
+    {
+      "author": "Theater Critic Daily",
+      "excerpt": "An emotionally charged rendition of Shakespeare's classic that will leave you breathless.",
+      "url": "https://theatercriticdaily.com/review-romeo-and-juliet"
+    },
+    {
+      "author": "Broadway Times",
+      "excerpt": "Jane Doe's direction brings new life to the timeless tragedy of Romeo and Juliet.",
+      "url": "https://broadwaytimes.com/romeo-and-juliet-review"
+    },
+    {
+      "author": "London Theatre Magazine",
+      "excerpt": "A stellar performance by the cast, with breathtaking visuals and sound design.",
+      "url": "https://londontheatremagazine.com/reviews/romeo-and-juliet"
+    }
+  ],
+
+  "awards": [
+    {
+      "name": "Best Direction Award",
+      "organization": "National Theater Awards",
+      "year": 2023,
+      "description": "Recognized for Jane Doe's outstanding direction of Romeo and Juliet."
+    },
+    {
+      "name": "Outstanding Performance Award",
+      "organization": "Drama Guild",
+      "year": 2023,
+      "description": "Awarded to Emily Johnson for her portrayal of Juliet."
+    }
+  ],
+
+  "grants": [
+    {
+      "name": "Art Council Grant",
+      "organization": "National Arts Council",
+      "year": 2023,
+      "description": "Funding provided to support the production of Romeo and Juliet."
+    },
+    {
+      "name": "Cultural Heritage Grant",
+      "organization": "Heritage Trust",
+      "year": 2022,
+      "description": "Awarded for the preservation and promotion of classical theater."
+    }
+  ]
+}
