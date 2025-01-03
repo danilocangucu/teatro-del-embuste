@@ -7,11 +7,9 @@ type ShowDTO = {
   additionalImages: string[]; // Array of URLs for additional images
   importantNotice?: string; // Optional notice for attendees
   durationMinutes: number; // Duration of the show in minutes
-  startDate: string; // Start date of the show (YYYY-MM-DD)
-  endDate: string; // End date of the show (YYYY-MM-DD)
 
   technicalDetails: {
-    company: string; // Name of the theater company
+    company?: string; // Name of the theater company
     director: string; // Director's name
     playwright: string; // Playwright's name
     cast: {
