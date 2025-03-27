@@ -1,79 +1,20 @@
 {
-  "id": "show-123",
-  "title": "Romeo and Juliet",
-
-  "tagline": "A timeless love story by William Shakespeare.",
-
-  "description": "Set in Verona, this classic tale follows the passionate and tragic love story of Romeo and Juliet, two young lovers from feuding families. Despite the odds, they fight for their love in a world filled with hatred and misunderstanding. This production breathes fresh life into Shakespeare's iconic masterpiece, blending powerful performances with stunning visual design. Perfect for both first-time theatergoers and seasoned enthusiasts.",
-
-  "mainImage": "https://example.com/images/romeo-and-juliet-main.jpg",
-  "additionalImages": [
-    "https://example.com/images/romeo-and-juliet-1.jpg",
-    "https://example.com/images/romeo-and-juliet-2.jpg"
-  ],
-  "importantNotice": "Please arrive 30 minutes early for bag checks.",
-  "durationMinutes": 120,
+  "title": "La Secreta Obscenidad",
+  "tagline": "Nos robaron hasta las palabras",
+  "description": "Dos hombres se encuentran frente a frente y por casualidad a la entrada de un colegio el primer día de clases. No habría nada raro, a no ser porque ambos visten tan sólo unas gabardinas con las que parecen, apenas, cubrir sus desnudeces. ¿Son, acaso, unos exhibicionistas? ¿Tal vez unos depravados? ¿O unos terroristas? ¿Y si fueran tan sólo Carlos Marx y Sigmund Freud…? Con un tono delirante y farsesco, la obra convoca a dos hombres perversos y entrañables al mismo tiempo, víctimas y víctimarios, causa y consecuencia de una sociedad y una situación histórica profundamente corrompidas. Retrato desgarrado y explosivo de la esquizofrenia de una sociedad, asistimos a una versión muy libre y muy local de un texto que, ya de por sí, figura entre los puntos más altos de la dramaturgia latinoamericana.",
   "technicalDetails": {
-    "company": "The Shakespeare Theatre Company",
-    "director": "Jane Doe",
-    "playwright": "William Shakespeare",
-    "cast": [
-      { "name": "John Smith", "role": "Romeo" },
-      { "name": "Emily Johnson", "role": "Juliet" }
-    ],
-    "productionTeam": [
-      { "role": "Lighting Designer", "name": "Alice Brown" },
-      { "role": "Sound Designer", "name": "Bob White" }
-    ],
-    "genre": "Tragedy",
-    "language": "English"
+    "premiereYear": 2014,
+    "durationMinutes": 100,
+    "company": "Teatro del Embuste",
+    "genre": "Farsa subversiva",
+    "language": "Español"
   },
-
   "reviews": [
     {
-      "author": "Theater Critic Daily",
-      "excerpt": "An emotionally charged rendition of Shakespeare's classic that will leave you breathless.",
-      "url": "https://theatercriticdaily.com/review-romeo-and-juliet"
-    },
-    {
-      "author": "Broadway Times",
-      "excerpt": "Jane Doe's direction brings new life to the timeless tragedy of Romeo and Juliet.",
-      "url": "https://broadwaytimes.com/romeo-and-juliet-review"
-    },
-    {
-      "author": "London Theatre Magazine",
-      "excerpt": "A stellar performance by the cast, with breathtaking visuals and sound design.",
-      "url": "https://londontheatremagazine.com/reviews/romeo-and-juliet"
-    }
-  ],
-
-  "awards": [
-    {
-      "name": "Best Direction Award",
-      "organization": "National Theater Awards",
-      "year": 2023,
-      "description": "Recognized for Jane Doe's outstanding direction of Romeo and Juliet."
-    },
-    {
-      "name": "Outstanding Performance Award",
-      "organization": "Drama Guild",
-      "year": 2023,
-      "description": "Awarded to Emily Johnson for her portrayal of Juliet."
-    }
-  ],
-
-  "grants": [
-    {
-      "name": "Art Council Grant",
-      "organization": "National Arts Council",
-      "year": 2023,
-      "description": "Funding provided to support the production of Romeo and Juliet."
-    },
-    {
-      "name": "Cultural Heritage Grant",
-      "organization": "Heritage Trust",
-      "year": 2022,
-      "description": "Awarded for the preservation and promotion of classical theater."
+      "author_name": "Juan Antonio Pizarro",
+      "publication_name": "Confidencial Colombia",
+      "excerpt": "Un montaje que retuerce el alma o por lo menos los intestinos.",
+      "url": "https://confidencialnoticias.com/teatro/mintieron-marx-y-freud__237423/2015/03/01/"
     }
   ]
 }

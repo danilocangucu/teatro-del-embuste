@@ -5,57 +5,13 @@
   "endDate": "2024-01-20",
   "isPremiere": true,
   "defaultTime": "19:00",
-  "eventDates": [
-    { "date": "2024-01-10" },
-    { "date": "2024-01-12", "time": "20:00" },
-    { "date": "2024-01-15" },
-    { "date": "2024-01-18", "time": "18:00" }
+  "performances": [
+    { "date": "2024-01-10", "availableSeats": 0 },
+    { "date": "2024-01-12", "time": "20:00", "availableSeats": 5 },
+    { "date": "2024-01-15", "availableSeats": 10 },
+    { "date": "2024-01-18", "time": "18:00", "availableSeats": 40 }
   ],
   "totalSeats": 40,
-  "availableSeats": 32,
-  "pricing": [
-    {
-      "type": "standard",
-      "price": 15.0
-    },
-    {
-      "type": "student",
-      "price": 12.0
-    }
-  ],
-  "discountRules": [
-    {
-      "type": "time_based",
-      "criteria": {
-        "daysBeforeEvent": 7
-      },
-      "discount": {
-        "type": "percentage",
-        "value": 10.0,
-        "description": "Early bird discount"
-      }
-    },
-    {
-      "type": "day_based",
-      "criteria": {
-        "daysOfWeek": ["Wednesday"]
-      },
-      "discount": {
-        "type": "percentage",
-        "value": 5.0,
-        "description": "Midweek discount"
-      }
-    },
-    {
-      "type": "ticket_type",
-      "criteria": {
-        "ticketTypes": ["student"]
-      },
-      "discount": {
-        "type": "flat",
-        "value": 2.0,
-        "description": "$2 off for students"
-      }
-    }
-  ]
+  "pricingIds": ["pricing-001", "pricing-002"],
+  "discountRuleIds": ["discount-001", "discount-002", "discount-003"]
 }
