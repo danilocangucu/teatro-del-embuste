@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model artist_roles {
+  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  artist_id String  @db.Uuid
+  show_id   String  @db.Uuid
+  context   String? @db.VarChar(255)
+  role_id   String? @db.Uuid
+  artists   artists @relation(fields: [artist_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  roles     roles?  @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  shows     shows   @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model artists {
+  id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name         String         @db.VarChar(255)
+  artist_roles artist_roles[]
+}
+
+model authors {
+  id      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name    String    @db.VarChar(255)
+  reviews reviews[]
+}
+
+model awards {
+  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name            String         @db.VarChar(255)
+  description     String         @db.VarChar(255)
+  organization_id String?        @db.Uuid
+  organizations   organizations? @relation(fields: [organization_id], references: [id], onUpdate: NoAction, map: "fk_award_organization")
+  show_awards     show_awards[]
+}
+
+enum DownloadType {
+  text
+  dossier
+  technicalRider
+}
+
+model downloads {
+  id            String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  show_id       String @db.Uuid
+  download_type DownloadType
+  url           String
+  shows         shows  @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model grants {
+  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name            String         @db.VarChar(255)
+  description     String         @db.VarChar(255)
+  organization_id String?        @db.Uuid
+  organizations   organizations? @relation(fields: [organization_id], references: [id], onUpdate: NoAction, map: "fk_grant_organization")
+  show_grants     show_grants[]
+}
+
+enum MediaType {
+  mainImage
+  additionalImage
+  trailer
+  fullPlay
+  poster
+}
+
+model media {
+  id         String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  show_id    String @db.Uuid
+  media_type MediaType
+  url        String
+  shows      shows  @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model organizations {
+  id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name   String   @unique @db.VarChar(255)
+  awards awards[]
+  grants grants[]
+}
+
+model publications {
+  id      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name    String    @db.VarChar(255)
+  reviews reviews[]
+}
+
+model reviews {
+  id             String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  author_id      String        @db.Uuid
+  excerpt        String
+  url            String
+  show_id        String        @db.Uuid
+  publication_id String?       @db.Uuid
+  publications   publications? @relation(fields: [publication_id], references: [id], onUpdate: NoAction, map: "fk_publication")
+  authors        authors       @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  shows          shows         @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+enum RoleType {
+  cast
+  production
+}
+
+model roles {
+  id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name         String         @unique
+  role_type    RoleType
+  artist_roles artist_roles[]
+}
+
+model show_awards {
+  award_id String  @db.Uuid
+  show_id  String  @db.Uuid
+  year     Int
+  context  String? @db.VarChar(255)
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  awards   awards  @relation(fields: [award_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  shows    shows   @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model show_grants {
+  grant_id String  @db.Uuid
+  show_id  String  @db.Uuid
+  year     Int
+  context  String? @db.VarChar(255)
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  grants   grants  @relation(fields: [grant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  shows    shows   @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model shows {
+  id               String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title            String         @db.VarChar(255)
+  tagline          String
+  description      String
+  important_notice String?        @db.VarChar(255)
+  genre            String?        @db.VarChar(100)
+  language         String?        @db.VarChar(50)
+  premiere_year    Int?
+  duration_minutes Int?
+  company          String?        @db.VarChar(255)
+  slug             String         @unique @db.VarChar(255)
+  artists     artist_roles[]
+  downloads        downloads[]
+  media            media[]
+  reviews          reviews[]
+  awards      show_awards[]
+  grants      show_grants[]
+}
