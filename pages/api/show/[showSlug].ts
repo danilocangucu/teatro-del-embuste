@@ -2,7 +2,6 @@ import { getShow } from "@/app/services/showService";
 import { sanitizeShow } from "@/app/utils/showUtils";
 import { NextApiRequest, NextApiResponse } from "next";
 
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { showSlug } = req.query;
 
