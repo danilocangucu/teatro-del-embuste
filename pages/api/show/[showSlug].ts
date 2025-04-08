@@ -1,8 +1,11 @@
-import { getShow } from "@/app/services/showService";
-import { sanitizeShow } from "@/app/utils/showUtils";
 import { NextApiRequest, NextApiResponse } from "next";
+import { getShow } from "@/services/showService";
+import { sanitizeShow } from "@/utils/showUtils";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const { showSlug } = req.query;
 
   try {
