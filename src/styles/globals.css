@@ -1,0 +1,100 @@
+/* UTOPIA GRID */
+/* @link https://utopia.fyi/grid/calculator?c=320,18,1.2,1240,20,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+
+:root {
+  --grid-max-width: 77.50rem;
+  --grid-gutter: var(--space-s-l, clamp(1.125rem, 0.6467rem + 2.3913vw, 2.5rem));
+  --grid-columns: 12;
+}
+
+.u-container {
+  max-width: var(--grid-max-width);
+  padding-inline: var(--grid-gutter);
+  margin-inline: auto;
+}
+
+.u-grid {
+  display: grid;
+  gap: var(--grid-gutter);
+}
+
+/* SPACES */
+/* @link https://utopia.fyi/space/calculator?c=320,18,1.2,1240,20,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-2xl&g=s,l,xl,12 */
+
+:root {
+  /* Space 3xs: 5px → 5px */
+  --space-3xs: clamp(0.3125rem, 0.3125rem + 0vw, 0.3125rem);
+  /* Space 2xs: 9px → 10px */
+  --space-2xs: clamp(0.5625rem, 0.5408rem + 0.1087vw, 0.625rem);
+  /* Space xs: 14px → 15px */
+  --space-xs: clamp(0.875rem, 0.8533rem + 0.1087vw, 0.9375rem);
+  /* Space s: 18px → 20px */
+  --space-s: clamp(1.125rem, 1.0815rem + 0.2174vw, 1.25rem);
+  /* Space m: 27px → 30px */
+  --space-m: clamp(1.6875rem, 1.6223rem + 0.3261vw, 1.875rem);
+  /* Space l: 36px → 40px */
+  --space-l: clamp(2.25rem, 2.163rem + 0.4348vw, 2.5rem);
+  /* Space xl: 54px → 60px */
+  --space-xl: clamp(3.375rem, 3.2446rem + 0.6522vw, 3.75rem);
+  /* Space 2xl: 72px → 80px */
+  --space-2xl: clamp(4.5rem, 4.3261rem + 0.8696vw, 5rem);
+  /* Space 3xl: 108px → 120px */
+  --space-3xl: clamp(6.75rem, 6.4891rem + 1.3043vw, 7.5rem);
+
+  /* One-up pairs */
+  /* Space 3xs-2xs: 5px → 10px */
+  --space-3xs-2xs: clamp(0.3125rem, 0.2038rem + 0.5435vw, 0.625rem);
+  /* Space 2xs-xs: 9px → 15px */
+  --space-2xs-xs: clamp(0.5625rem, 0.4321rem + 0.6522vw, 0.9375rem);
+  /* Space xs-s: 14px → 20px */
+  --space-xs-s: clamp(0.875rem, 0.7446rem + 0.6522vw, 1.25rem);
+  /* Space s-m: 18px → 30px */
+  --space-s-m: clamp(1.125rem, 0.8641rem + 1.3043vw, 1.875rem);
+  /* Space m-l: 27px → 40px */
+  --space-m-l: clamp(1.6875rem, 1.4049rem + 1.413vw, 2.5rem);
+  /* Space l-xl: 36px → 60px */
+  --space-l-xl: clamp(2.25rem, 1.7283rem + 2.6087vw, 3.75rem);
+  /* Space xl-2xl: 54px → 80px */
+  --space-xl-2xl: clamp(3.375rem, 2.8098rem + 2.8261vw, 5rem);
+  /* Space 2xl-3xl: 72px → 120px */
+  --space-2xl-3xl: clamp(4.5rem, 3.4565rem + 5.2174vw, 7.5rem);
+
+  /* Custom pairs */
+  /* Space s-2xl: 18px → 80px */
+  --space-s-2xl: clamp(1.125rem, -0.2228rem + 6.7391vw, 5rem);
+}
+
+/* UTOPIA: NAV BAR */
+/* @link https://utopia.fyi/type/calculator?c=320,18,1.2,1240,20,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+
+:root {
+  /* Step 0: 18px → 20px */
+  --navbar-step-0: clamp(1.125rem, 1.0815rem + 0.2174vw, 1.25rem);
+}
+
+
+:root {
+  --background: #F4EDDB;
+  --foreground: #000000;
+  --color-primary: #BF2024;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ibm-plex-mono-medium {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  font-style: normal;
+}
