@@ -17,7 +17,9 @@
 }
 
 .links {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-secondary);
+    font-weight: var(--font-secondary-weight);
+    font-style: var(--font-secondary-style);
   padding-left: var(--space-s-2xl);
   padding-right: var(--space-s-2xl);
   display: grid;
