@@ -1,7 +1,6 @@
 import { ShowDTO } from "@/types/Show";
 import styles from '../styles/Show.module.css';
 
-
 interface ShowProps {
   showData: ShowDTO;
 }
