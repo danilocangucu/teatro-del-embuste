@@ -16,10 +16,11 @@
   grid-column: 3;
 }
 
+.logoHeight {
+  height: var(--space-xl-2xl);
+  width: auto;
+}
 .links {
-  font-family: var(--font-secondary);
-    font-weight: var(--font-secondary-weight);
-    font-style: var(--font-secondary-style);
   padding-left: var(--space-s-2xl);
   padding-right: var(--space-s-2xl);
   display: grid;
