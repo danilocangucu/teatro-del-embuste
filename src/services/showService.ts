@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { ShowFromDB } from "../types/Show";
+import { ShowFromDB, ShowMetadataFromDB } from "../types/Show";
+import { EventMetadataFromDB } from "@/types/Event";
 
 const prisma = new PrismaClient();
 
@@ -7,6 +8,17 @@ export const getShow = async (showSlug: string) => {
   const show = await prisma.shows.findUnique({
     where: { slug: showSlug },
     include: {
+      show_category: {
+        select: {
+          categories: {
+            select: {
+              name: true,
+              hex_color: true,
+            },
+          },
+        },
+      },
+
       reviews: {
         select: {
           excerpt: true,
@@ -23,18 +35,26 @@ export const getShow = async (showSlug: string) => {
           },
         },
       },
+
       media: {
         select: {
           media_type: true,
           url: true,
+          artists: {
+            select: {
+              name: true,
+            },
+          },
         },
       },
+
       downloads: {
         select: {
           download_type: true,
           url: true,
         },
       },
+
       artists: {
         select: {
           context: true,
@@ -51,6 +71,7 @@ export const getShow = async (showSlug: string) => {
           },
         },
       },
+
       grants: {
         select: {
           grants: {
@@ -68,6 +89,7 @@ export const getShow = async (showSlug: string) => {
           year: true,
         },
       },
+
       awards: {
         select: {
           awards: {
@@ -93,4 +115,57 @@ export const getShow = async (showSlug: string) => {
   }
 
   return show as ShowFromDB;
+};
+
+export const getShowId = async (showSlug: string) => {
+  const show = await prisma.shows.findUnique({
+    where: { slug: showSlug },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!show) {
+    throw new Error("Show not found");
+  }
+
+  return show.id;
+};
+
+// TODO change media_type in the DB to enums
+export const getShowMetadata = async (showSlug: string) => {
+  const showMetadata = (await prisma.shows.findUnique({
+    where: { slug: showSlug },
+    select: {
+      id: true,
+      title: true,
+      tagline: true,
+      media: {
+        where: {
+          media_type: "mainImage",
+        },
+        select: {
+          url: true,
+        },
+      },
+    },
+  })) as ShowMetadataFromDB;
+
+  if (!showMetadata) {
+    throw new Error("Show not found");
+  }
+
+  const eventMetadata = (await prisma.events.findFirst({
+    where: { show_id: showMetadata.id },
+    select: {
+      start_date: true,
+      end_date: true,
+    },
+  })) as EventMetadataFromDB;
+
+  if (!eventMetadata) {
+    throw new Error("Event not found");
+  }
+
+  return { showMetadata, eventMetadata };
 };
