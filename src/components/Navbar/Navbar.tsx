@@ -15,21 +15,9 @@ import {
 } from "@/utils/navbarUtils";
 
 export default function Navbar() {
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  useEffect(() => {
-    setHasMounted(true);
-
-    const handleResize = () => {
-      setIsSmallScreen(window.innerWidth < 975);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const pathname = usePathname() ?? "";
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -40,10 +28,6 @@ export default function Navbar() {
       document.body.style.overflow = "";
     }
   }, [isMenuOpen]);
-
-  const pathname = usePathname() ?? "";
-
-  if (!hasMounted) return null;
 
   return (
     <header role="banner" className="u-container">
@@ -66,8 +50,11 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Links */}
-        {isSmallScreen ? (
+        {/* Navigation links */}
+        <div className={styles.navDesktop}>
+          {renderNavLinks("desktop", pathname)}
+        </div>
+        <div className={styles.navMobile}>
           <BurgerMenu
             right
             styles={burgerMenuStyles}
@@ -76,19 +63,7 @@ export default function Navbar() {
           >
             {renderNavLinks("burger", pathname)}
           </BurgerMenu>
-        ) : (
-          renderNavLinks("desktop", pathname)
-        )}
-
-        {/* User icon */}
-        {/* <div
-          className={styles.userIcon}
-          role="button"
-          aria-label="Iniciar sesión"
-          tabIndex={0}
-        >
-          👤
-        </div> */}
+        </div>
       </nav>
     </header>
   );

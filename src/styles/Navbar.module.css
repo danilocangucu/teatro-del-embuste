@@ -1,3 +1,10 @@
+.navDesktop {
+  text-align: right;
+}
+
+.navMobile {
+  display: none;
+}
 .nav {
   display: grid;
   grid-template-columns: min-content 1fr min-content;
@@ -100,3 +107,12 @@
 }
 
 */
+@media (max-width: 974px) {
+  .navDesktop {
+    display: none;
+  }
+
+  .navMobile {
+    display: block;
+  }
+}
