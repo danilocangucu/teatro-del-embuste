@@ -1,0 +1,225 @@
+.boleteriaAccordionRoot {
+  margin-top: var(--space-s);
+  margin-bottom: var(--space-s);
+}
+
+.boleteriaAccordionBlock {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.boleteriaAccordionTrigger {
+  padding: var(--space-3xs-2xs);
+  color: var(--color-quaternary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--step-3);
+  cursor: pointer;
+  margin-top: var(--space-s);
+  background-color: var(--color-tertiary);
+}
+
+.boleteriaAccordionTrigger:hover {
+  background-color: var(--color-tertiary-light);
+}
+
+.boleteriaChevronIcon {
+  width: var(--step-2);
+  height: var(--step-2);
+  transition: transform 0.2s ease;
+}
+
+.boleteriaAccordionContent {
+  overflow: hidden;
+  border-top: 2px solid var(--color-quaternary);
+  color: var(--color-quaternary);
+  background-color: var(--color-tertiary);
+  font-size: var(--step-1);
+  line-height: 1.2;
+  will-change: height;
+}
+
+.boleteriaAccordionContent[data-state="open"] {
+  animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.boleteriaAccordionContent[data-state="closed"] {
+  animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.boleteriaPricings {
+  font-size: var(--step-1);
+  padding-right: var(--space-3xs-2xs);
+  padding-left: var(--space-3xs-2xs);
+  padding-bottom: var(--space-2xs-xs);
+  padding-top: var(--space-2xs-xs);
+}
+
+.boleteriaPricings h3 {
+  font-size: var(--step-2);
+  color: var(--color-quinary);
+}
+
+.boleteriaPricings p {
+  display: block;
+  font-size: var(--step-0);
+}
+
+.boleteriaPricings ul {
+  display: block;
+  margin-top: var(--space-2xs);
+}
+
+.boleteriaPricings ul li {
+  display: block;
+}
+
+.boleteriaPricingsGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3xs);
+}
+
+.boleteriaPricingsGrid::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 98%;
+  border-bottom: 2px solid var(--color-quaternary);
+}
+
+.boleteriaPricingsGrid > div:nth-child(2) {
+  border-left: 2px solid var(--color-quaternary);
+  padding-left: var(--space-3xs-2xs);
+}
+
+.boleteriaPricings h3 {
+  font-size: var(--step-2);
+  color: var(--color-quinary);
+}
+
+.boleteriaFunciones {
+  padding-right: var(--space-3xs-2xs);
+  padding-left: var(--space-3xs-2xs);
+  padding-bottom: var(--space-2xs-xs);
+  padding-top: var(--space-2xs-xs);
+}
+
+.boleteriaFunciones ul {
+  margin-top: var(--space-2xs);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.boleteriaFunciones ul li {
+  font-size: var(--step-0);
+  color: var(--color-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.boleteriaFunciones ul li div {
+  padding-top: var(--space-3xs);
+  padding-left: var(--space-xs);
+  padding-right: var(--space-xs);
+}
+
+.boleteriaFuncionesLinks {
+  color: var(--color-secondary);
+  background-color: var(--color-quaternary);
+  padding-bottom: var(--space-2xs);
+}
+
+.boleteriaFuncionesStatus {
+  text-align: center;
+  background-color: var(--color-secondary);
+  padding-bottom: var(--space-3xs);
+}
+
+.boleteriaFuncionesUltimas {
+  color: var(--color-quinary);
+}
+
+.boleteriaFuncionesAgotada {
+  color: var(--color-quaternary)
+}
+
+.boleteriaFunciones h3 {
+  font-size: var(--step-2);
+  color: var(--color-quinary);
+}
+
+@media (max-width: 768px) {
+  .boleteriaAccordionTrigger {
+    font-size: var(--step-2);
+  }
+
+  .boleteriaPricings h3 {
+    font-size: var(--step-1);
+  }
+
+  .boleteriaPricings {
+    font-size: var(--step-0);
+  }
+
+  .boleteriaFunciones h3 {
+    font-size: var(--step-1);
+  }
+
+  .boleteriaFunciones ul li {
+    font-size: var(--step--1);
+  }
+
+}
+
+@media (max-width: 650px) {
+  .boleteriaPricingsGrid {
+    grid-template-columns: none;
+  }
+
+  .boleteriaPricings p {
+    font-size: var(--step--1);
+  }
+
+  .boleteriaPricingsGrid > div:nth-child(2) {
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 550px) {
+  .boleteriaFunciones ul {
+    display: block;
+  }
+  
+  .boleteriaFunciones ul li {
+    text-align: center;
+    display: block;
+    margin-top: var(--space-xs);
+  }
+}
+

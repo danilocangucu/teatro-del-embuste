@@ -1,12 +1,46 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+body {
+  color: var(--color-secondary);
+  background: var(--color-primary);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 .defaultBrowserMargin {
   margin: 8px;
+}
+button,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+figcaption,
+footer,
+ul,
+li,
+a {
+  all: unset;
+}
+
+a:hover {
+  cursor: pointer;
 }
 /* UTOPIA GRID */
 /* @link https://utopia.fyi/grid/calculator?c=320,18,1.2,1240,20,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
 
 :root {
-  --grid-max-width: 77.50rem;
-  --grid-gutter: var(--space-s-l, clamp(1.125rem, 0.6467rem + 2.3913vw, 2.5rem));
+  --grid-max-width: 77.5rem;
+    --grid-gutter: var(--space-s-l,
+        clamp(1.125rem, 0.6467rem + 2.3913vw, 2.5rem));
   --grid-columns: 12;
 }
 
@@ -63,55 +97,154 @@
   --space-2xl-3xl: clamp(4.5rem, 3.4565rem + 5.2174vw, 7.5rem);
 
   /* Custom pairs */
+    /* Space 3xs-m: 5px → 30px */
+      --space-3xs-m: clamp(0.3125rem, -0.231rem + 2.7174vw, 1.875rem);
   /* Space s-2xl: 18px → 80px */
   --space-s-2xl: clamp(1.125rem, -0.2228rem + 6.7391vw, 5rem);
   /* Space xl-2xl: 54px → 80px */
-    --space-xl-2xl: clamp(3.375rem, 2.8098rem + 2.8261vw, 5rem);
+  --space-xl-2xl: clamp(3.375rem, 2.8098rem + 2.8261vw, 5rem);
 }
 
 /* UTOPIA FONTS */
 /* @link https://utopia.fyi/type/calculator?c=320,18,1.2,1240,20,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
 
 :root {
+    /* Step -4: 8.6806px → 8.192px */
+      --step--4: clamp(0.512rem, 0.5532rem + -0.0531vw, 0.5425rem);
+      /* Step -3: 10.4167px → 10.24px */
+      --step--3: clamp(0.64rem, 0.6549rem + -0.0192vw, 0.651rem);
+      /* Step -2: 12.5px → 12.8px */
+      --step--2: clamp(0.7813rem, 0.7747rem + 0.0326vw, 0.8rem);
+      /* Step -1: 15px → 16px */
+      --step--1: clamp(0.9375rem, 0.9158rem + 0.1087vw, 1rem);
   /* Step 0: 18px → 20px */
   --step-0: clamp(1.125rem, 1.0815rem + 0.2174vw, 1.25rem);
+    /* Step 1: 21.6px → 25px */
+      --step-1: clamp(1.35rem, 1.2761rem + 0.3696vw, 1.5625rem);
+      /* Step 2: 25.92px → 31.25px */
+      --step-2: clamp(1.62rem, 1.5041rem + 0.5793vw, 1.9531rem);
+      /* Step 3: 31.104px → 39.0625px */
+      --step-3: clamp(1.944rem, 1.771rem + 0.8651vw, 2.4414rem);
+      /* Step 4: 37.3248px → 48.8281px */
+      --step-4: clamp(2.3328rem, 2.0827rem + 1.2504vw, 3.0518rem);
+      /* Step 5: 44.7898px → 61.0352px */
+      --step-5: clamp(2.7994rem, 2.4462rem + 1.7658vw, 3.8147rem);
+      /* Step 6: 53.7477px → 76.2939px */
+      --step-6: clamp(3.3592rem, 2.8691rem + 2.4507vw, 4.7684rem);
+      /* Step 7: 64.4973px → 95.3674px */
+      --step-7: clamp(4.0311rem, 3.36rem + 3.3555vw, 5.9605rem);
 }
 
 /* COLORS */
 :root {
-  --background: #F4EDDB;
-  --foreground: #000000;
-  --color-primary: #BF2024;
-}
-
+  --color-primary: #f4eddb;
+    --color-secondary: #000000;
+    --color-tertiary: #bf2024;
+    --color-tertiary-light: #cc373a;
+    --color-quaternary: #f4f4f4;
+    --color-quinary: #ffd700;
+  }
+    .colorPrimary {
+      color: var(--color-primary) !important;
+    }
+  
+    .colorSecondary {
+      color: var(--color-secondary) !important;
+    }
+  
+    .colorTertiary {
+      color: var(--color-tertiary) !important;
+    }
+  
+    .colorQuaternary {
+      color: var(--color-quaternary) !important;
+    }
+  
+    .colorQuinary {
+      color: var(--color-quinary) !important;
+    }
+  
+    /* FONTS */
 :root {
-  --font-secondary: 'IBM Plex Mono', monospace;
-  --font-secondary-weight: 500;
-  --font-secondary-style: normal;
+  --font-primary: "Roboto Serif", serif;
+    --font-primary-weight: 400;
+    --font-primary-style: normal;
+    --font-primary-italic: "Roboto Serif", serif;
+    --font-primary-italic-weight: 400;
+    --font-primary-italic-style: italic;
+    --font-primary-bold: "Roboto Serif", serif;
+    --font-primary-bold-weight: 700;
+    --font-primary-bold-style: normal;
+    --font-secondary-medium: "IBM Plex Mono", monospace;
+    --font-secondary-medium-weight: 500;
+    --font-secondary-medium-style: normal;
+    --font-secondary-bold: "IBM Plex Mono", monospace;
+    --font-secondary-bold-weight: 700;
+    --font-secondary-bold-style: normal;
+  }
+  
+  .fontPrimary {
+    font-family: var(--font-primary);
+    font-weight: var(--font-primary-weight);
+    font-style: var(--font-primary-style);
+    line-height: calc(1.8 * var(--space-s));
+  }
+  
+  .fontPrimaryItalic {
+    font-family: var(--font-primary-italic);
+    font-weight: var(--font-primary-italic-weight);
+    font-style: var(--font-primary-italic-style);
+  }
+  
+  .fontPrimaryBold {
+    font-family: var(--font-primary-bold);
+    font-weight: var(--font-primary-bold-weight);
+    font-style: var(--font-primary-bold-style);
+  }
+  
+  .fontSecondaryMedium {
+    font-family: var(--font-secondary-medium);
+    font-weight: var(--font-secondary-medium-weight);
+    font-style: var(--font-secondary-medium-style);
+  }
+  
+  .fontSecondaryBold {
+    font-family: var(--font-secondary-bold);
+    font-weight: var(--font-secondary-bold-weight);
+    font-style: var(--font-secondary-bold-style);
 }
 
-/* FONTS */
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+@media (max-width: 540px) {
+  .fontPrimary {
+    line-height: calc(1.6 * var(--space-s));
+  }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ACCESIBILITY */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.ibm-plex-mono-medium {
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 500;
-  font-style: normal;
+/* LINKS */
+.activeLink {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 25%;
 }
-.fontSecondary {
-  font-family: var(--font-secondary);
-  font-weight: var(--font-secondary-weight);
-  font-style: var(--font-secondary-style);
+.activeLink:hover {
+  color: var(--color-tertiary);
+}
+
+.arrowRightUp {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
 }

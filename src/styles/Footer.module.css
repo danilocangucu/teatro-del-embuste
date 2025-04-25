@@ -1,0 +1,119 @@
+.footer {
+  display: block;
+  margin-top: var(--space-m);
+  background-color: var(--color-primary);
+  background-color: var(--color-secondary);
+  padding-left: var(--space-s);
+  padding-right: var(--space-s);
+    padding-top: var(--space-l);
+    padding-bottom: var(--space-l);
+  color: var(--color-quaternary);
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  grid-gap: var(--space-xs);
+}
+
+.footerLogo img {
+  max-width: var(--step-7);
+  height: auto;
+}
+
+.footerItem h4 {
+  font-size: var(--step--1);
+}
+
+.footerItem p {
+  display: block;
+  margin-top: var(--space-3xs);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.footerItem a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (max-width: 905px) {
+  .footerGrid {
+    grid-template-columns: auto auto auto;
+    grid-template-rows: auto auto;
+  }
+
+  .footerItem:nth-of-type(4) {
+    grid-column: 2;
+    /* Second row, second column (email) */
+  }
+
+  .footerItem:nth-of-type(5) {
+    grid-column: 3;
+    /* Second row, third column (instagram) */
+  }
+}
+
+@media (max-width: 560px) {
+  .footerGrid {
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto auto;
+  }
+
+  .footerItem:nth-of-type(4),
+  .footerItem:nth-of-type(5) {
+    grid-column: auto;
+    /* Reset previous grid-column */
+  }
+}
+
+@media (max-width: 465px) {
+  .footerGrid {
+    grid-gap: var(--space-2xs);
+  }
+
+  .footerItem h4 {
+    font-size: var(--step--2);
+  }
+
+  .footerItem p {
+    font-size: var(--step--2);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    word-break: normal;
+  }
+}
+
+@media (max-width: 400) {
+  .footerItem h4 {
+    font-size: var(--step--3);
+  }
+
+  .footerItem p {
+    font-size: var(--step--3);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    word-break: normal;
+  }
+}
+
+@media (max-width: 350px) {
+  .footerGrid {
+    grid-template-columns: auto;
+    grid-template-rows: auto auto auto auto auto;
+  }
+
+  .footerItem h4 {
+    font-size: var(--step--1);
+  }
+
+  .footerItem p {
+    font-size: var(--step--1);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    word-break: normal;
+  }
+}

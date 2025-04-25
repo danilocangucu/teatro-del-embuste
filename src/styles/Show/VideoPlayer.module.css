@@ -1,0 +1,24 @@
+:global(.video-js .vjs-big-play-button) {
+  font-size: var(--step-3) !important;
+  border: 1px solid var(--color-quaternary) !important;
+  background-color: var(--color-tertiary) !important;
+  border-radius: 0 !important;
+  margin-top: calc(-1 * var(--space-s)) !important;
+  margin-left: calc(-1 * var(--space-l-xl)) !important;
+  line-height: calc(1.1 * var(--step-5)) !important;
+  height: calc(var(--step-5) * 1.1) !important;
+  width: calc(var(--step-7) * 1.2) !important;
+}
+
+:global(.video-js .vjs-big-play-button:hover) {
+  background-color: var(--color-tertiary-light) !important;
+}
+
+@media (max-width: 540px) {
+  :global(.video-js .vjs-big-play-button) {
+    font-size: var(--step-2) !important;
+    line-height: calc(0.8 * var(--step-5)) !important;
+    height: calc(var(--step-4) * 1) !important;
+    width: calc(var(--step-7) * 1.1) !important;
+  }
+}
