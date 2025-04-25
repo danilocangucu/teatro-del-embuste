@@ -22,6 +22,7 @@ model artists {
   id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name         String         @db.VarChar(255)
   artist_roles artist_roles[]
+  media        media[]
 }
 
 model authors {
@@ -61,21 +62,23 @@ model grants {
   organizations   organizations? @relation(fields: [organization_id], references: [id], onUpdate: NoAction, map: "fk_grant_organization")
   show_grants     show_grants[]
 }
-
-enum MediaType {
-  mainImage
-  additionalImage
-  trailer
-  fullPlay
-  poster
-}
+// TODO: Add enum for media_type in DB
+// enum MediaType {
+//   mainImage
+//   additionalImage
+//   trailer
+//   fullPlay
+//   poster
+// }
 
 model media {
-  id         String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  show_id    String @db.Uuid
-  media_type MediaType
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  show_id    String   @db.Uuid
+  media_type String
   url        String
-  shows      shows  @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  artist_id  String?  @db.Uuid
+  artists    artists? @relation(fields: [artist_id], references: [id], onUpdate: NoAction, map: "fk_media_artist")
+  shows      shows    @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model organizations {
@@ -147,10 +150,159 @@ model shows {
   duration_minutes Int?
   company          String?        @db.VarChar(255)
   slug             String         @unique @db.VarChar(255)
-  artists     artist_roles[]
+  artists          artist_roles[]
   downloads        downloads[]
+  events           events[]
   media            media[]
   reviews          reviews[]
-  awards      show_awards[]
-  grants      show_grants[]
+  awards           show_awards[]
+  show_category    show_category?
+  grants           show_grants[]
+}
+
+model discount_criteria {
+  discount_rule_id  String         @id @db.Uuid
+  days_before_event Int?
+  days_of_week      weekday[]
+  ticket_types      ticket_type[]
+  discount_rules    discount_rules @relation(fields: [discount_rule_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model discount_rules {
+  id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  type                 discount_rule_type
+  discount_id          String                 @db.Uuid
+  discount_criteria    discount_criteria?
+  discounts            discounts              @relation(fields: [discount_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_discount_rules event_discount_rules[]
+}
+
+model discounts {
+  id                String              @id @db.Uuid
+  type              discount_type
+  value             Decimal             @db.Decimal(10, 2)
+  description       String
+  discount_rules    discount_rules[]
+  reservation_items reservation_items[]
+}
+
+model event_discount_rules {
+  event_id         String         @db.Uuid
+  discount_rule_id String         @db.Uuid
+  discount_rules   discount_rules @relation(fields: [discount_rule_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  events           events         @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([event_id, discount_rule_id])
+}
+
+model event_pricings {
+  event_id   String   @db.Uuid
+  pricing_id String   @db.Uuid
+  events     events   @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  pricings   pricings @relation(fields: [pricing_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([event_id, pricing_id])
+}
+
+model events {
+  id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  show_id              String                 @db.Uuid
+  start_date           DateTime               @db.Date
+  end_date             DateTime               @db.Date
+  is_premiere          Boolean
+  default_time         DateTime               @db.Time(6)
+  total_seats          Int
+  event_discount_rules event_discount_rules[]
+  event_pricings       event_pricings[]
+  shows                shows                  @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_events_show")
+  performances         performances[]
+}
+
+model performances {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String         @db.Uuid
+  date            DateTime       @db.Date
+  time            DateTime?      @db.Time(6)
+  available_seats Int
+  events          events         @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reservations    reservations[]
+}
+
+model pricings {
+  id             String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  type           ticket_type
+  price          Decimal          @db.Decimal(10, 2)
+  event_pricings event_pricings[]
+}
+
+model reservation_items {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reservation_id String       @db.Uuid
+  ticket_type    ticket_type
+  quantity       Int
+  unit_price     Int
+  discount_id    String?      @db.Uuid
+  total_price    Int
+  discounts      discounts?   @relation(fields: [discount_id], references: [id], onUpdate: NoAction, map: "fk_discount_id")
+  reservations   reservations @relation(fields: [reservation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model reservations {
+  id                String              @id(map: "reservations_pkey1") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  performance_id    String              @db.Uuid
+  status            reservation_status
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  expires_at        DateTime?           @db.Timestamp(6)
+  user_id           String?             @db.Uuid
+  total_price       Int
+  reservation_items reservation_items[]
+  performances      performances        @relation(fields: [performance_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reservations_performance_id_fkey1")
+}
+
+model categories {
+  id            String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name          String         @unique(map: "unique_category_name") @db.VarChar(8)
+  hex_color     String         @unique(map: "unique_category_color") @db.VarChar(7)
+  show_category show_category?
+}
+
+model show_category {
+  show_id     String      @id @db.Uuid
+  category_id String?     @unique @db.Uuid
+  categories  categories? @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  shows       shows       @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+enum discount_rule_type {
+  time_based
+  day_based
+  ticket_type
+}
+
+enum discount_type {
+  percentage
+  flat
+}
+
+enum reservation_status {
+  pending
+  confirmed
+  expired
+  cancelled
+}
+
+enum ticket_type {
+  standard
+  student
+  senior
+}
+
+enum weekday {
+  mon
+  tue
+  wed
+  thu
+  fri
+  sat
+  sun
 }
