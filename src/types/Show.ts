@@ -1,5 +1,6 @@
 export type ShowDTO = {
   title: string; // Title of the show
+  category: CategoryDTO;
   tagline: string; // Tagline or brief description of the show
   description: string; // Full description or synopsis of the show
   technicalDetails: TechnicalDetailsDTO; // Store technical details in a separate object
@@ -10,6 +11,17 @@ export type ShowDTO = {
   grants?: GrantDTO[]; // Array of grants
 };
 
+export type ShowMetadataDTO = {
+  title: string;
+  tagline: string;
+  media: { url: string }; // Main image URL
+};
+
+export type CategoryDTO = {
+  name: string; // Name of the category
+  hexColor: string; // Hex color code for the category
+};
+
 export type MediaDTO = {
   mediaType:
     | "mainImage"
@@ -18,6 +30,7 @@ export type MediaDTO = {
     | "fullPlay"
     | "poster"; // Descriptive media type
   url: string; // URL to the media content
+  artist?: string | null; // Optional artist name associated with the media
 };
 
 export type DownloadDTO = {
@@ -32,7 +45,7 @@ export type TechnicalDetailsDTO = {
   artists: ArtistDTO[]; // Array of artists (cast and production team) with their roles
   genre: string | null; // Genre of the show
   language: string | null; // Language of the show
-  importantNotice?: string; // Optional notice for attendees
+  importantNotice: string | null; // Optional notice for attendees
 };
 
 export type ArtistDTO = {
@@ -52,7 +65,7 @@ export type ReviewDTO = {
 export type AwardDTO = {
   name: string; // Name of the award
   description: string; // Description of the award
-  context?: string; // Context will come before the award name (e.g., context: "Premio a la mejor obra de teatro")
+  context?: string | null; // Context will come before the award name (e.g., context: "Premio a la mejor obra de teatro")
   year: number; // Year the award was received
   organization: string; // Awarding organization
 };
@@ -60,7 +73,7 @@ export type AwardDTO = {
 export type GrantDTO = {
   name: string; // Name of the grant
   description: string; // Description of the grant
-  context?: string; // Context will come before the grant name (e.g., context: "Beca a la mejor obra de teatro")
+  context?: string | null; // Context will come before the grant name (e.g., context: "Beca a la mejor obra de teatro")
   year: number; // Year the grant was awarded
   organization: string; // Granting organization
 };
@@ -68,6 +81,7 @@ export type GrantDTO = {
 export type ShowFromDB = {
   id: string;
   title: string;
+  show_category: { categories: CategoryFromDB };
   tagline: string;
   description: string;
   important_notice: string | null;
@@ -117,6 +131,18 @@ export type ShowFromDB = {
   }[];
 };
 
+export type ShowMetadataFromDB = {
+  id: string;
+  title: string;
+  tagline: string;
+  media: { url: string }; // Main image URL
+};
+
+export type CategoryFromDB = {
+  name: string;
+  hex_color: string;
+};
+
 export type ReviewFromDB = {
   excerpt: string;
   url: string;
@@ -136,6 +162,9 @@ export type MediaFromDB = {
     | "fullPlay"
     | "poster";
   url: string;
+  artists?: {
+    name: string;
+  };
 };
 
 export type DownloadFromDB = {
