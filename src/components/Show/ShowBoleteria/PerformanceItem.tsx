@@ -1,6 +1,7 @@
 import Link from "next/link";
 import classNames from "classnames";
 import styles from "../../../styles/Show/Boleteria/BoleteriaAccordion.module.css";
+import { ticketsPath } from "@/utils/constants";
 
 type Props = {
   formattedDate: string;
@@ -29,7 +30,7 @@ export default function PerformanceItem({
         {isSoldOut ? (
           <>{formattedDate}</>
         ) : (
-          <Link href={`/boleteria/${showSlug}/${performanceSlug}`}>
+            <Link href={`${ticketsPath}/${showSlug}/${performanceSlug}`}>
             {formattedDate}
           </Link>
         )}
