@@ -1,0 +1,30 @@
+name: Docker Build Benchmark
+
+on:
+  workflow_dispatch: # allows manual trigger from GitHub UI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker BuildKit
+        run: |
+          echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+
+      - name: Record start time
+        id: start
+        run: echo "time=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker image
+        run: |
+          docker build -t my-nextjs-app .
+
+      - name: Record end time & calculate duration
+        run: |
+          END=$(date +%s)
+          START=${{ steps.start.outputs.time }}
+          echo "Build took $((END - START)) seconds"
