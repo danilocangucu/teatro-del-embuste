@@ -1,0 +1,41 @@
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+export const createUser = async (
+  fullName: string,
+  email: string,
+  isGuest: boolean,
+  reservationId: string
+) => {
+  try {
+    const user = await prisma.users.create({
+      data: {
+        full_name: fullName,
+        email,
+        is_guest: isGuest,
+        reservation_id: reservationId,
+      },
+    });
+    return user.id;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw new Error("Failed to create user");
+  }
+};
+
+export const getUser = async (userId: string) => {
+  try {
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      console.warn(`[getUser] User with ID ${userId} not found`);
+      return null;
+    }
+    return user;
+  } catch (error) {
+    console.error("[getUser] Error fetching user:", error);
+    throw new Error("[getUser] Failed to fetch user");
+  }
+}
