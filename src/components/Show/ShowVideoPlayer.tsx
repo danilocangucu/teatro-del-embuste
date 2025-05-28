@@ -44,7 +44,7 @@ export default function ShowVideoPlayer({ videoId }: { videoId: string }) {
   }, [videoId]);
 
   return (
-    <section>
+    <section className="videoPlayer">
       <div data-vjs-player>
         <video
           ref={videoRef}
