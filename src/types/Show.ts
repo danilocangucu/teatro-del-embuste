@@ -135,7 +135,7 @@ export type ShowMetadataFromDB = {
   id: string;
   title: string;
   tagline: string;
-  media: { url: string }; // Main image URL
+  media: { url: string }[]; // Main image URL
 };
 
 export type CategoryFromDB = {

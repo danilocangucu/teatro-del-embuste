@@ -18,12 +18,14 @@ export type EventMetadataDTO = {
 };
 
 export type PerformanceDTO = {
+  id: string; // Unique identifier for the performance
   date: string; // Specific date for the performance (YYYY-MM-DD)
   time?: string; // Optional time if different from the default time
   availableSeats: number; // Number of seats currently available for this performance
 };
 
-type TicketType = "standard" | "student" | "senior"; // Enum-like union type
+// TODO check if there is still senior type somewhere
+export type TicketType = "standard" | "student" | "senior"; // Enum-like union type
 
 export type PricingDTO = {
   type: TicketType;
@@ -42,7 +44,8 @@ type DiscountCriteriaDTO = {
   ticketTypes?: TicketType[];
 };
 
-type DiscountDTO = {
+export type DiscountDTO = {
+  id: string; // Unique identifier for the discount
   type: "percentage" | "flat"; // Type of discount value
   value: number; // Discount value (percentage or flat amount)
   description: string; // Description of the discount
@@ -51,13 +54,10 @@ type DiscountDTO = {
 export type ReservationDTO = {
   id: string;
   performanceId: string;
-  ticketType: TicketType;
-  quantity: number;
   status: ReservationStatus;
   createdAt: string;
   expiresAt?: string;
   userId?: string; // Optional, if the reservation is linked to a user
-  appliedDiscounts?: DiscountDTO[]; // Optional, if discounts are applied
   totalPrice: number; // Total price after applying discounts
 };
 
@@ -89,6 +89,7 @@ export type EventMetadataFromDB = {
 };
 
 export type PerformanceFromDB = {
+  id: string;
   date: Date;
   time: Date | null;
   available_seats: number;
@@ -101,13 +102,12 @@ export type PricingFromDB = {
 
 export type DiscountRuleFromDB = {
   type: "time_based" | "day_based" | "ticket_type";
-
   discounts: DiscountFromDB[];
-
   discount_criteria: DiscountCriteriaFromDB | null;
 };
 
 export type DiscountFromDB = {
+  id: string;
   type: "percentage" | "flat";
   value: Decimal;
   description: string;
