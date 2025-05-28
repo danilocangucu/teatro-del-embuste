@@ -24,6 +24,9 @@ jobs:
           pwd
           ls -la
 
+      - name: Show Dockerfile contents
+        run: cat Dockerfile
+
       - name: Build Docker image
         run: docker build -t my-nextjs-app .
 
