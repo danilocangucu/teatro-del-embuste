@@ -25,6 +25,12 @@ jobs:
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
+      - name: Create .env file from secret
+        run: echo "${{ secrets.DOTENV_FILE }}" > .env
+
+      - name: Show .env content for debugging
+        run: cat .env
+
       - name: Build Docker image
         run: docker build -t teatrodelembuste .
 
