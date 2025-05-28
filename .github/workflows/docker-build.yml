@@ -1,7 +1,7 @@
 name: Docker Build Benchmark
 
 on:
-  workflow_dispatch: # allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,9 +19,13 @@ jobs:
         id: start
         run: echo "time=$(date +%s)" >> "$GITHUB_OUTPUT"
 
-      - name: Build Docker image
+      - name: Debug current directory
         run: |
-          docker build -t my-nextjs-app .
+          pwd
+          ls -la
+
+      - name: Build Docker image
+        run: docker build -t my-nextjs-app .
 
       - name: Record end time & calculate duration
         run: |
