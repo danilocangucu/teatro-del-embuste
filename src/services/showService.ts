@@ -117,11 +117,12 @@ export const getShow = async (showSlug: string) => {
   return show as ShowFromDB;
 };
 
-export const getShowId = async (showSlug: string) => {
+export const getShowIdAndTitle = async (showSlug: string) => {
   const show = await prisma.shows.findUnique({
     where: { slug: showSlug },
     select: {
       id: true,
+      title: true,
     },
   });
 
@@ -129,10 +130,11 @@ export const getShowId = async (showSlug: string) => {
     throw new Error("Show not found");
   }
 
-  return show.id;
+  return { showId: show.id, showTitle: show.title };
 };
 
 // TODO change media_type in the DB to enums
+// TODO check getShowMetadata errors
 export const getShowMetadata = async (showSlug: string) => {
   const showMetadata = (await prisma.shows.findUnique({
     where: { slug: showSlug },
@@ -169,3 +171,18 @@ export const getShowMetadata = async (showSlug: string) => {
 
   return { showMetadata, eventMetadata };
 };
+
+export const getShowSlugFromShowId = async (showId: string) => {
+  const show = await prisma.shows.findUnique({
+    where: { id: showId },
+    select: { slug: true },
+  });
+
+  if (!show) {
+    throw new Error("Show not found");
+  }
+
+  return show.slug;
+}
+
+// TODO get showSlug and 
