@@ -5,11 +5,19 @@ import { NextResponse } from "next/server";
 const TICKET_SUFIX = process.env.TICKET_SUFIX!;
 
 export async function POST(req: Request) {
-  const { eventId, performanceId, reservationId, expiresAt, reservationItems } = await req.json();
+  const { eventId, performanceId, reservationId, expiresAt, reservationItems } =
+    await req.json();
 
   const response = NextResponse.json({ success: true });
 
-  setReservationInCookie(response, eventId, performanceId, reservationId, expiresAt, reservationItems);
+  setReservationInCookie(
+    response,
+    eventId,
+    performanceId,
+    reservationId,
+    expiresAt,
+    reservationItems
+  );
 
   return response;
 }
@@ -44,11 +52,10 @@ export async function PUT(req: Request) {
 
   parsed.userId = userId;
 
-    const expiresAt = new Date(parsed.expiresAt).getTime();
+  const expiresAt = new Date(parsed.expiresAt).getTime();
   const now = Date.now();
   const remainingMs = expiresAt - now;
   const remainingSeconds = Math.max(1, Math.floor(remainingMs / 1000)); // avoid 0 or negative
-
 
   const response = NextResponse.json({ success: true });
   response.cookies.set(key, JSON.stringify(parsed), {
@@ -63,15 +70,18 @@ export async function PUT(req: Request) {
 export async function GET(req: Request) {
   console.log("🔍 Checking reservation status...");
   // TODO do I still need eventId and performanceId to check the reservation status?!
-  const eventId = "e410f25f-b097-47a2-96cc-ed6b23978f34"
-  const performanceId = "87735ae2-f147-4a1c-9f78-146e6dadca75"
+  const eventId = "e410f25f-b097-47a2-96cc-ed6b23978f34";
+  const performanceId = "87735ae2-f147-4a1c-9f78-146e6dadca75";
 
   // TODO get reservationId from query params
   const reservationIdFromParams = new URL(req.url).searchParams.get("id");
 
   if (!reservationIdFromParams) {
     console.warn("⚠️ No reservation ID found in query params.");
-    return NextResponse.json({ success: false, error: "No reservation ID provided." });
+    return NextResponse.json({
+      success: false,
+      error: "No reservation ID provided.",
+    });
   }
 
   const reqCookies = req.headers.get("cookie") || "";
@@ -87,7 +97,11 @@ export async function GET(req: Request) {
   const existing = cookiesMap[key];
   if (!existing) {
     console.warn("⚠️ No existing cookie found.");
-    return NextResponse.json({ success: false, error: "No cookie found.", status: 400 });
+    return NextResponse.json({
+      success: false,
+      error: "No cookie found.",
+      status: 400,
+    });
   }
 
   let parsed;
@@ -101,14 +115,23 @@ export async function GET(req: Request) {
   const reservationId = parsed.reservationId;
   if (!reservationId) {
     console.warn("⚠️ No reservation ID found in cookie.");
-    return NextResponse.json({ success: false, error: "No reservation ID found.", status: 400 });
+    return NextResponse.json({
+      success: false,
+      error: "No reservation ID found.",
+      status: 400,
+    });
   }
 
   if (`${reservationId}${TICKET_SUFIX}` !== reservationIdFromParams) {
-    console.warn("⚠️ Reservation ID from cookie with TICKET_SUFIX does not match query param.");
+    console.warn(
+      "⚠️ Reservation ID from cookie with TICKET_SUFIX does not match query param."
+    );
     console.warn("Cookie reservation ID with TICKET_SUFIX:", reservationId);
     console.warn("Query param reservation ID:", reservationIdFromParams);
-    return NextResponse.json({ success: false, error: "Reservation ID mismatch." });
+    return NextResponse.json({
+      success: false,
+      error: "Reservation ID mismatch.",
+    });
   }
 
   const userId = parsed.userId;
@@ -121,14 +144,20 @@ export async function GET(req: Request) {
 
   if (!reservation) {
     console.warn("⚠️ No reservation found for ID:", reservationId);
-    return NextResponse.json({ success: false, error: "Reservation not found." });
+    return NextResponse.json({
+      success: false,
+      error: "Reservation not found.",
+    });
   }
 
   console.log("✅ Reservation found:", reservation);
 
   if (!reservation.user_id) {
     console.warn("⚠️ No user ID associated with reservation.");
-    return NextResponse.json({ success: false, error: "No user ID associated with reservation." });
+    return NextResponse.json({
+      success: false,
+      error: "No user ID associated with reservation.",
+    });
   }
 
   if (reservation.user_id !== userId) {
@@ -140,26 +169,17 @@ export async function GET(req: Request) {
 
   if (!reservation.bold_payment_id) {
     console.warn("⚠️ No bold payment ID associated with reservation.");
-    return NextResponse.json({ success: false, error: "No bold payment ID associated with reservation." });
-  }
-
-  const boldOrderId = `${reservation.bold_payment_id}${TICKET_SUFIX}`;
-
-  console.log("✅ Bold order ID:", boldOrderId);
-
-  if (reservation.bold_payment_id !== `${reservationIdFromParams}${TICKET_SUFIX}`) {
-    console.warn("⚠️ Reservation ID does not match bold payment ID.");
-    return NextResponse.json({ success: false, error: "Reservation ID mismatch with bold payment ID." });
+    return NextResponse.json({
+      success: false,
+      error: "No bold payment ID associated with reservation.",
+    });
   }
 
   return NextResponse.json({
     success: true,
     reservation: {
-      boldOrderId,
       status: reservation.status,
       expiresAt: reservation.expires_at,
     },
   });
-} 
-
-
+}
