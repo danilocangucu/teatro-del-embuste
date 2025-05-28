@@ -63,6 +63,7 @@ export const sanitizeShow = (show: ShowFromDB): ShowDTO => {
   };
 };
 
+// TODO check show.media in sanitizeShowMetadata
 export const sanitizeShowMetadata = (show: ShowMetadataFromDB): ShowMetadataDTO => {
   return { 
     title: show.title,
