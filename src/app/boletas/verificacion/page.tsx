@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getReservationByBoldPaymentId } from "@/services/ticketService";
+import { getReservation } from "@/services/ticketService";
 import { PollingReservation } from "@/components/Ticket/PollingReservation";
 import { Stepper } from "@/components/shared/Stepper";
 import { headers } from "next/headers";
@@ -10,6 +10,7 @@ import {
 } from "@/services/performanceService";
 import { getShowIdByEventId } from "@/services/eventService";
 import { getShowSlugFromShowId } from "@/services/showService";
+import { reservation_status } from "@prisma/client";
 
 // TODO how could I block access to this page if someone puts a fake bold-order-id in the URL?
 
@@ -36,27 +37,26 @@ export default async function Home({ searchParams }: Props) {
   const boldOrderIdWithoutSufix = boldOrderId.replace(TICKET_SUFIX, "");
 
   // TODO retry to fetch reservation,
-  const reservation = await getReservationByBoldPaymentId(boldOrderId);
+  const reservation = await getReservation(boldOrderIdWithoutSufix);
 
   if (!reservation) {
     console.warn(
-      "[VERIFICACION] No reservation found for bold-order-id YET:",
+      "[VERIFICACION] No reservation found for bold-order-id:",
       boldOrderId
     );
-  return (
+  } else {
+    console.log("[VERIFICACION] Reservation fetched:", reservation);
+    if (reservation.status !== reservation_status.confirmed) {
+      console.warn(
+        "[VERIFICACION] Reservation status is not confirmed, current status:",
+        reservation.status
+      );
+      return (
     <>
       <Stepper currentStep="Verificación" />
       <PollingReservation boldOrderId={boldOrderId}/>
     </>
-    )
-    } else {
-    console.log("[VERIFICACION] Reservation fetched:", reservation);
-
-    if (reservation.id !== boldOrderIdWithoutSufix) {
-      console.warn(
-        "[VERIFICACION] Reservation ID does not match bold-order-id without sufix"
-      );
-      notFound();
+      )
     }
 
     const eventId = await getEventIdByPerformanceId(reservation.performance_id);
@@ -71,6 +71,7 @@ export default async function Home({ searchParams }: Props) {
     // Get reservation from cookie
     const reqHeaders = await headers();
     console.log("[VERIFICACION] Request headers obtained");
+    // TODO verificacion should also check if user is the same from the cookie & reservation
     const reservationFromCookie = await getReservationFromCookieViaHeaders(
       reqHeaders,
       eventId,
@@ -93,10 +94,6 @@ export default async function Home({ searchParams }: Props) {
     }
 
     // TODO verification should check if expiresAt is still valid
-
-    console.log(
-      "[VERIFICACION] Reservation verified, redirecting to /confirmacion"
-    );
 
     const performance = await getPerformanceByReservationId(reservation.id);
     if (!performance) {
@@ -133,6 +130,10 @@ export default async function Home({ searchParams }: Props) {
     const performanceSlug = "07-06-25-6PM";
 
     console.log("[VERIFICACION] Performance slug formatted:", performanceSlug);
+
+    console.log(
+      "[VERIFICACION] Reservation verified, redirecting to /confirmacion"
+    );
 
     redirect(`/boletas/${showSlug}/${performanceSlug}/confirmacion`);
   }
