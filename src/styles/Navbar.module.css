@@ -107,7 +107,8 @@
 }
 
 */
-@media (max-width: 974px) {
+/* TODO Burger menu disabled for now, enable when other pages are available */
+/* @media (max-width: 974px) {
   .navDesktop {
     display: none;
   }
@@ -116,3 +117,5 @@
     display: block;
   }
 }
+
+*/

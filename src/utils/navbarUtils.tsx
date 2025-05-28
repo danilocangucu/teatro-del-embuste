@@ -51,12 +51,13 @@ type NavLink = {
   label: string;
 };
 
+// TODO enable the links when the pages are ready
 export const navLinks: NavLink[] = [
-  { href: "/programacion", label: "PROGRAMACIÓN" },
-  { href: "/boleteria", label: "BOLETERÍA" },
-  { href: "/grupo", label: "GRUPO" },
-  { href: "/sala", label: "SALA" },
-  { href: "/escritos", label: "ESCRITOS" },
+  // { href: "/programacion", label: "PROGRAMACIÓN" },
+  // { href: "/boleteria", label: "BOLETERÍA" },
+  // { href: "/grupo", label: "GRUPO" },
+  // { href: "/sala", label: "SALA" },
+  // { href: "/escritos", label: "ESCRITOS" },
 ];
 
 export const isActiveLink = (pathname: string, href: string) => {
