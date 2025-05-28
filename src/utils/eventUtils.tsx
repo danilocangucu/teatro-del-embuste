@@ -9,6 +9,7 @@ export const sanitizeEvent = (event: EventFromDB): EventDTO => {
     totalSeats: event.total_seats,
 
     performances: event.performances.map((performance: PerformanceFromDB) => ({
+      id: performance.id,
       date: performance.date.toISOString().split("T")[0],
       time: performance.time?.toISOString().slice(11, 16),
       availableSeats: performance.available_seats,
@@ -29,6 +30,7 @@ export const sanitizeEvent = (event: EventFromDB): EventDTO => {
         ticketTypes: ruleWrapper.discount_rules.discount_criteria?.ticket_types,
       },
       discount: {
+        id: ruleWrapper.discount_rules.discounts.id,
         type: ruleWrapper.discount_rules.discounts.type,
         value: parseFloat(
           ruleWrapper.discount_rules.discounts.value.toString()
