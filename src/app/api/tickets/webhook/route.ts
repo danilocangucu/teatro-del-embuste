@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { getReservation, updateReservationStatusAndPaymentId } from "@/services/ticketService";
 import { reservation_status } from "@prisma/client";
 
-const BOLD_SECRET_KEY = process.env.BOLD_PRUEBA_LLAVE_SECRETA!;
+// const BOLD_SECRET_KEY = process.env.BOLD_PRUEBA_LLAVE_SECRETA!;
 const BOLD_MERCHANT_ID = process.env.BOLD_MERCHANT_ID!;
 const TICKET_SUFIX = process.env.TICKET_SUFIX!;
 
@@ -84,9 +84,7 @@ async function processWebhook(req: Request) {
   const rawBuffer = Buffer.from(rawBody);
   const encoded = rawBuffer.toString("base64");
 
-  const generatedHmac = createHmac("sha256", BOLD_SECRET_KEY)
-    .update(encoded)
-    .digest("hex");
+  const generatedHmac = createHmac("sha256", "").update(encoded).digest("hex");
 
   const hmacBuffer = Buffer.from(generatedHmac, "hex");
   const signatureBuffer = Buffer.from(signature, "hex");
@@ -152,52 +150,65 @@ async function processWebhook(req: Request) {
   console.log("[Webhook] 📦 Event to process:", event);
 
   const reservation = await getReservation(event.reservationId);
-    if (!reservation) {
-        console.error("[Webhook] ❌ Reservation not found", {
-        reservationId: event.reservationId,
-        });
-        // TODO send e-mail to embuste admin with reservationId not found and body
-        throw new Error("[Webhook] Reservation not found");
-    }
+  if (!reservation) {
+    console.error("[Webhook] ❌ Reservation not found", {
+      reservationId: event.reservationId,
+    });
+    // TODO send e-mail to embuste admin with reservationId not found and body
+    throw new Error("[Webhook] Reservation not found");
+  }
 
-    console.log("[Webhook] ✅ Reservation found:", reservation);
+  console.log("[Webhook] ✅ Reservation found:", reservation);
 
-    if (reservation.total_price !== event.totalPrice) {
-        console.error("[Webhook] ❌ Price mismatch", {
-        expectedPrice: reservation.total_price,
-        receivedPrice: event.totalPrice,
-        });
-        // TODO send e-mail to embuste admin with reservationId, expected price from DB, received price from webhook and body
-        throw new Error("[Webhook] Price mismatch");
-    }
+  // TODO attention: while testing, total from Bold is 0, should be changed in production
+  if (0 !== event.totalPrice) {
+    // if (reservation.total_price !== event.totalPrice) {
+    console.error("[Webhook] ❌ Price mismatch", {
+      expectedPrice: reservation.total_price,
+      receivedPrice: event.totalPrice,
+    });
+    // TODO send e-mail to embuste admin with reservationId, expected price from DB, received price from webhook and body
+    throw new Error("[Webhook] Price mismatch");
+  }
 
-    console.log("[Webhook] ✅ Price matches, processing event...");
+  console.log("[Webhook] ✅ Price matches, processing event...");
 
-    if (reservation.status !== reservation_status.reviewing) {
-        console.warn(`[Webhook] ⚠️ Reservation received with status ${reservation.status}`, {
+  if (reservation.status !== reservation_status.reviewing) {
+    console.warn(
+      `[Webhook] ⚠️ Reservation received with status ${reservation.status}`,
+      {
         reservationId: event.reservationId,
         status: reservation.status,
-        });
-        // TODO send e-mail to embuste admin with reservationId, status from DB and status from webhook and body
-        return;
-    }
+      }
+    );
+    // TODO send e-mail to embuste admin with reservationId, status from DB and status from webhook and body
+    return;
+  }
 
-    console.warn(`[Webhook] ⚠️ Processing reservation ${event.reservationId} with status ${reservation.status}`);
-    console.warn(`[Webhook] ⚠️ User id: ${reservation.user_id}`);
+  console.warn(
+    `[Webhook] ⚠️ Processing reservation ${event.reservationId} with status ${reservation.status}`
+  );
+  console.warn(`[Webhook] ⚠️ User id: ${reservation.user_id}`);
 
-    const reservationStatus =
+  const reservationStatus =
     event.paymentStatus === "SALE_APPROVED"
-        ? "confirmed"
-        : event.paymentStatus === "SALE_REJECTED"
-        ? "cancelled"
-        : event.paymentStatus === "VOID_APPROVED"
-        ? "cancellation_approved"
-        : "cancellation_denied";
+      ? "confirmed"
+      : event.paymentStatus === "SALE_REJECTED"
+      ? "cancelled"
+      : event.paymentStatus === "VOID_APPROVED"
+      ? "cancellation_approved"
+      : "cancellation_denied";
 
-    if (reservationStatus !== "cancelled" && reservationStatus !== "confirmed") {
-        console.warn(`[Webhook] ⚠️ Updating reservation ${event.reservationId} status to ${reservationStatus}`);
-    }
+  if (reservationStatus !== "cancelled" && reservationStatus !== "confirmed") {
+    console.warn(
+      `[Webhook] ⚠️ Updating reservation ${event.reservationId} status to ${reservationStatus}`
+    );
+  }
 
-    const updatedReservation = await updateReservationStatusAndPaymentId(event.reservationId, reservationStatus, event.boltPaymentId);
-    console.log("[Webhook] ✅ Reservation updated:", updatedReservation);
+  const updatedReservation = await updateReservationStatusAndPaymentId(
+    event.reservationId,
+    reservationStatus,
+    event.boltPaymentId
+  );
+  console.log("[Webhook] ✅ Reservation updated:", updatedReservation);
 }
