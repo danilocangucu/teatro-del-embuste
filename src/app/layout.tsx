@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer/Footer";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Teatro del Embuste",
@@ -27,6 +28,10 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&display=swap"
           rel="stylesheet"
+        />
+        <Script
+          src="https://checkout.bold.co/library/boldPaymentButton.js"
+          strategy="lazyOnload"
         />
       </head>
       <body>
