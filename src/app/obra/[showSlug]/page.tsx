@@ -12,12 +12,10 @@ import { sanitizeEvent, sanitizeEventMetadata } from "@/utils/eventUtils";
 import { filterUpcomingPerformances } from "@/utils/sharedUtils";
 
 type Props = {
-  params: { showSlug: string };
+  params: Promise<{ showSlug: string }>;
 };
 
-export async function generateMetadata(
-  { params }: Props
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { showSlug } = await params;
 
   let showMetadata, eventMetadata;
