@@ -1,24 +1,21 @@
-import { EventFromDB, PerformanceFromDB } from "@/types/Event";
+import { DiscountDTO, EventFromDB, PerformanceFromDB } from "@/types/Event";
 
 export function parseTimeString(timeString: string): Date {
-    const [hours, minutes, seconds] = timeString.split(":").map(Number);
-    const date = new Date();
-    date.setHours(hours, minutes, seconds || 0, 0);
-    return date;
-  }
+  const [hours, minutes, seconds] = timeString.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours, minutes, seconds || 0, 0);
+  return date;
+}
 
 export function combineDateAndTime(date: Date, time: Date): Date {
-    const combined = new Date(date);
-    combined.setHours(
-      time.getHours(),
-      time.getMinutes(),
-      time.getSeconds(),
-      0
-    );
-    return combined;
-  }
+  const combined = new Date(date);
+  combined.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), 0);
+  return combined;
+}
 
-export function filterUpcomingPerformances(event: EventFromDB): PerformanceFromDB[] {
+export function filterUpcomingPerformances(
+  event: EventFromDB
+): PerformanceFromDB[] {
   const now = new Date();
 
   return event.performances
@@ -29,8 +26,7 @@ export function filterUpcomingPerformances(event: EventFromDB): PerformanceFromD
           : new Date(performance.date);
 
       const timeRaw = performance.time || event.default_time;
-      const time =
-        timeRaw instanceof Date ? timeRaw : parseTimeString(timeRaw);
+      const time = timeRaw instanceof Date ? timeRaw : parseTimeString(timeRaw);
 
       return { ...performance, date, time };
     })
@@ -39,3 +35,9 @@ export function filterUpcomingPerformances(event: EventFromDB): PerformanceFromD
       return combined >= now;
     });
 }
+
+export const getDiscountedPrice = (price: number, discount: DiscountDTO) => {
+  return discount.type === "percentage"
+    ? Math.round(price * (1 - discount.value / 100))
+    : Math.max(0, price - discount.value);
+};
