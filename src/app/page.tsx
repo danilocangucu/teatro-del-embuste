@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: Props) {
 
   if (!boldOrderId) {
     console.warn("[VERIFICACION] No bold-order-id found in search params");
-    notFound();
+    redirect("/obra/la-secreta");
   }
 
   console.log("[VERIFICACION] Bold order ID received:", boldOrderId);
