@@ -43,7 +43,7 @@ export function PollingReservation({ boldOrderId }: { boldOrderId: string }) {
           }
           console.log("[POLLING RESERVATION] Response data:", data);
           if (data.reservation) {
-            if (data.reservation.status === "confirmed") {
+            if (data.reservation.status === "confirmed" || data.reservation.status === "cancelled") {
               console.log(
                 "[POLLING RESERVATION] Reservation confirmed, stopping polling."
               );
@@ -77,12 +77,12 @@ export function PollingReservation({ boldOrderId }: { boldOrderId: string }) {
   if (reservation) {
     console.log("[POLLING RESERVATION] Reservation found:", reservation);
     return (
-      <div>
-        <h1>Resultado actual del pago</h1>
+      <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
+        <h1>Confirmación</h1>
         <br /><br />
-        <p>Reserva encontrada con ID: {reservation.id}</p>
+        <p>Tu compra ha sido encontrada.</p>
         <br />
-        <p>Estado del pago: {reservation.status}</p>
+        <p>Cargando detalles...</p>
         <br />
       </div>
     );
@@ -90,7 +90,7 @@ export function PollingReservation({ boldOrderId }: { boldOrderId: string }) {
 
   if (status === 400) {
     return (
-      <>
+      <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
         <p>
           No se encontró una reserva en tu sesión. Por favor, verifica que hayas
           realizado el pago correctamente y vuelve a intentarlo.
@@ -101,7 +101,7 @@ export function PollingReservation({ boldOrderId }: { boldOrderId: string }) {
         </p><br />
         <p>Horario de atención: lunes a viernes, de 9:00 a.m. a 5:00 p.m.</p><br /><br />
         <p>Gracias por tu paciencia.</p>
-      </>
+      </div>
     );
   }
 
@@ -110,7 +110,7 @@ export function PollingReservation({ boldOrderId }: { boldOrderId: string }) {
       "[POLLING RESERVATION] Max attempts reached, no reservation found."
     );
     return (
-      <>
+      <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
         <h1>Estado de la verificación</h1>
         <br />
         <br />
@@ -133,9 +133,13 @@ export function PollingReservation({ boldOrderId }: { boldOrderId: string }) {
         <br />
         <br />
         <p>Gracias por tu paciencia.</p>
-      </>
+      </div>
     );
   }
 
-  return <p>Verificando su pago, por favor espere...</p>;
+  return <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
+    <p>
+      Verificando su pago, por favor espere...
+    </p>
+  </div>;
 }

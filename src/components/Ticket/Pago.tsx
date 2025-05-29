@@ -37,6 +37,7 @@ export default function Pago({
   }, [amount, description, integritySignature, orderId]);
 
   return (
+    <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
     <main>
       <h1>Pago</h1>
       <br />
@@ -64,5 +65,6 @@ export default function Pago({
       <br />
       <div id="bold-button-container"></div>
     </main>
+    </div>
   );
 }

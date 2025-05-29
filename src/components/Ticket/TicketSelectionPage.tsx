@@ -32,7 +32,7 @@ export async function TicketSelectionPage({
   if (!performanceInEvent) {
     if (mappedEvent?.performances.length !== 0) {
       return (
-        <div style={{ padding: "2rem" }}>
+        <div style={{ padding: "40px" }}>
           <h2>Esta función no existe.</h2>
           <p>Puedes escoger otra función disponible para este espectáculo.</p>
         </div>
@@ -40,7 +40,7 @@ export async function TicketSelectionPage({
     }
 
     return (
-      <div style={{ padding: "2rem" }}>
+      <div style={{ padding: "40px" }}>
         <h2>No hay funciones disponibles.</h2>
         <p>Tal vez quieras revisar nuestra programación actual.</p>
       </div>

@@ -6,16 +6,17 @@ import { useRouter } from "next/navigation";
 
 export function UserOptions({ reservationId, eventId, performanceId }: { reservationId: string, eventId: string, performanceId: string }) {
   const [selected, setSelected] = useState<"login" | "create" | "guest">(
-    "login"
+    "guest"
   );
   const [isSubmittingGuest, setIsSubmittingGuest] = useState(false);
   // TODO : Replace with actual slug logic
   const showSlug = "la-secreta";
   const performanceSlug = "07-06-25-6PM";
   const router = useRouter();
+  console.log("[UserOptions] setSelected:", setSelected);
 
   return (
-    <div style={{ marginTop: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
+    <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
       {/* === SELECTED SECTION === */}
       {selected === "login" && (
         <>
@@ -214,57 +215,57 @@ export function UserOptions({ reservationId, eventId, performanceId }: { reserva
       )}
 
       {/* === ALTERNATIVE SECTIONS === */}
-      {getAlternateOptions(selected, setSelected)}
+      {/* {getAlternateOptions(selected, setSelected)} */}
     </div>
   );
 }
 
 // Updated helper with custom order logic
-function getAlternateOptions(
-  selected: "login" | "create" | "guest",
-  setSelected: (value: "login" | "create" | "guest") => void
-) {
-  const sections = {
-    login: {
-      label: "Iniciar sesión",
-      description:
-        "Usa tus credenciales si ya tienes una cuenta en el Teatro del Embuste.",
-    },
-    create: {
-      label: "Registrarme",
-      description:
-        "🪄 5% de descuento en todas tus compras de boletas durante un año.\n(Se aplica sobre el total, incluso si ya hay descuento).",
-    },
-    guest: {
-      label: "Comprar como invitad@",
-      description:
-        "🕊 Tu información personal solo se usará para esta compra.\nDespués de la función, será eliminada automáticamente.",
-    },
-  };
+// function getAlternateOptions(
+//   selected: "login" | "create" | "guest",
+//   setSelected: (value: "login" | "create" | "guest") => void
+// ) {
+//   const sections = {
+//     login: {
+//       label: "Iniciar sesión",
+//       description:
+//         "Usa tus credenciales si ya tienes una cuenta en el Teatro del Embuste.",
+//     },
+//     create: {
+//       label: "Registrarme",
+//       description:
+//         "🪄 5% de descuento en todas tus compras de boletas durante un año.\n(Se aplica sobre el total, incluso si ya hay descuento).",
+//     },
+//     guest: {
+//       label: "Comprar como invitad@",
+//       description:
+//         "🕊 Tu información personal solo se usará para esta compra.\nDespués de la función, será eliminada automáticamente.",
+//     },
+//   };
 
-  const alternateOrders: Record<
-    typeof selected,
-    Array<"login" | "create" | "guest">
-  > = {
-    login: ["create", "guest"],
-    create: ["login", "guest"],
-    guest: ["create", "login"],
-  };
+//   const alternateOrders: Record<
+//     typeof selected,
+//     Array<"login" | "create" | "guest">
+//   > = {
+//     login: ["create", "guest"],
+//     create: ["login", "guest"],
+//     guest: ["create", "login"],
+//   };
 
-  return alternateOrders[selected].map((key, index) => (
-    <div key={key}>
-      <Separator
-        text={index === 0 ? "––– o quizás... –––" : "––– también puedes... –––"}
-      />
-      <Button onClick={() => setSelected(key)}>{sections[key].label}</Button>
-      <br />
-      <br />
-      <p style={{ marginBottom: 12, whiteSpace: "pre-wrap" }}>
-        {sections[key].description}
-      </p>
-    </div>
-  ));
-}
+//   return alternateOrders[selected].map((key, index) => (
+//     <div key={key}>
+//       <Separator
+//         text={index === 0 ? "––– o quizás... –––" : "––– también puedes... –––"}
+//       />
+//       <Button onClick={() => setSelected(key)}>{sections[key].label}</Button>
+//       <br />
+//       <br />
+//       <p style={{ marginBottom: 12, whiteSpace: "pre-wrap" }}>
+//         {sections[key].description}
+//       </p>
+//     </div>
+//   ));
+// }
 
 // Reusable styles and components
 const inputStyle = {
@@ -276,10 +277,10 @@ const inputStyle = {
   borderRadius: 4,
 };
 
-function Separator({ text }: { text: string }) {
-  return (
-    <div style={{ textAlign: "center", margin: "32px 0", color: "#999" }}>
-      {text}
-    </div>
-  );
-}
+// function Separator({ text }: { text: string }) {
+//   return (
+//     <div style={{ textAlign: "center", margin: "32px 0", color: "#999" }}>
+//       {text}
+//     </div>
+//   );
+// }
