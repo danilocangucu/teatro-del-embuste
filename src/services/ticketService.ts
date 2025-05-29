@@ -1,15 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 import { TicketType } from "@/types/Event";
-
-const prisma = new PrismaClient();
 
 export const createReservation = async (
   performanceId: string,
   status: "pending",
-  userId: null,
+  userId: null
 ) => {
-        const now = new Date();
+  const now = new Date();
 
   const reservation = await prisma.reservations.create({
     data: {
@@ -22,7 +20,11 @@ export const createReservation = async (
     },
   });
 
-  return {id: reservation.id, timeNow: now, expiresAt: reservation.expires_at};
+  return {
+    id: reservation.id,
+    timeNow: now,
+    expiresAt: reservation.expires_at,
+  };
 };
 
 export const createReservationItem = async (
@@ -42,12 +44,14 @@ export const createReservationItem = async (
     },
   });
 
-return { id: reservationItem.id, ticketType, quantity: reservationItem.quantity };
-}
+  return {
+    id: reservationItem.id,
+    ticketType,
+    quantity: reservationItem.quantity,
+  };
+};
 
-export const getReservationItems = async (
-  reservationItemIds: string[]
-) => {
+export const getReservationItems = async (reservationItemIds: string[]) => {
   const reservationItems = await prisma.reservation_items.findMany({
     where: {
       id: {
@@ -69,11 +73,9 @@ export const getReservationItemsByReservationId = async (
   });
 
   return reservationItems;
-}
+};
 
-export const getReservationItem = async (
-  reservationItemId: string
-) => {
+export const getReservationItem = async (reservationItemId: string) => {
   const reservationItem = await prisma.reservation_items.findUnique({
     where: {
       id: reservationItemId,
@@ -84,9 +86,7 @@ export const getReservationItem = async (
 };
 
 // TODO HANDLE ERROR PROPERLY: Inconsistent column data: Error creating UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `h` at 1 -- db should return an error instead of crashing
-export const getReservation = async (
-  reservationId: string
-) => {
+export const getReservation = async (reservationId: string) => {
   const reservation = await prisma.reservations.findUnique({
     where: {
       id: reservationId,
@@ -108,16 +108,17 @@ export const updateReservationQuantityAndSeats = async (
   newAvailableSeats: number
 ) => {
   try {
-    const [updatedReservationItem, updatedPerformance] = await prisma.$transaction([
-      prisma.reservation_items.update({
-        where: { id: reservationItemId },
-        data: { quantity: newQuantity },
-      }),
-      prisma.performances.update({
-        where: { id: performanceId },
-        data: { available_seats: newAvailableSeats },
-      }),
-    ]);
+    const [updatedReservationItem, updatedPerformance] =
+      await prisma.$transaction([
+        prisma.reservation_items.update({
+          where: { id: reservationItemId },
+          data: { quantity: newQuantity },
+        }),
+        prisma.performances.update({
+          where: { id: performanceId },
+          data: { available_seats: newAvailableSeats },
+        }),
+      ]);
 
     return {
       reservationItemQuantity: updatedReservationItem.quantity,
@@ -139,7 +140,7 @@ export const updateReservationStatus = async (
   });
 
   return updatedReservation;
-}
+};
 
 export const getDiscountById = async (discountId: string) => {
   const discount = await prisma.discounts.findUnique({
@@ -159,7 +160,7 @@ export const getDiscountsByIds = async (discountIds: string[]) => {
   });
 
   return discounts;
-}
+};
 
 export const updateReservationAndItemsTotalPrices = async (
   reservationId: string,
@@ -187,7 +188,11 @@ export const updateReservationAndItemsTotalPrices = async (
 
 export const updateReservationStatusAndPaymentId = async (
   reservationId: string,
-  status: "confirmed" | "cancelled" | "cancellation_approved" | "cancellation_denied",
+  status:
+    | "confirmed"
+    | "cancelled"
+    | "cancellation_approved"
+    | "cancellation_denied",
   boldPaymentId: string
 ) => {
   const updatedReservation = await prisma.reservations.update({
@@ -200,11 +205,9 @@ export const updateReservationStatusAndPaymentId = async (
   }
 
   return updatedReservation;
-}
+};
 
-export const getReservationByBoldPaymentId = async (
-  boldPaymentId: string
-) => {
+export const getReservationByBoldPaymentId = async (boldPaymentId: string) => {
   const reservation = await prisma.reservations.findFirst({
     where: {
       bold_payment_id: boldPaymentId,
@@ -222,22 +225,20 @@ export const getReservationByBoldPaymentId = async (
       },
     });
 
-    console.log("All reservations with their bold_payment_id:", allReservations);
+    console.log(
+      "All reservations with their bold_payment_id:",
+      allReservations
+    );
     return null;
   }
 
-
-
-
-
   return reservation;
-}
+};
 
 export const updateReservationUserId = async (
   reservationId: string,
   userId: string
 ) => {
-
   console.log(`Updating reservation ${reservationId} with user ID ${userId}`);
 
   const updatedReservation = await prisma.reservations.update({
@@ -250,4 +251,4 @@ export const updateReservationUserId = async (
   }
 
   return true;
-}
+};

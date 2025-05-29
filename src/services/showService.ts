@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { ShowFromDB, ShowMetadataFromDB } from "../types/Show";
 import { EventMetadataFromDB } from "@/types/Event";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export const getShow = async (showSlug: string) => {
   const show = await prisma.shows.findUnique({
@@ -183,6 +181,6 @@ export const getShowSlugFromShowId = async (showId: string) => {
   }
 
   return show.slug;
-}
+};
 
-// TODO get showSlug and 
+// TODO get showSlug and

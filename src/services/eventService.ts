@@ -1,7 +1,5 @@
 import { EventFromDB } from "@/types/Event";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export const getEvent = async (showId: string) => {
   const event = await prisma.events.findFirst({

@@ -1,7 +1,5 @@
 import { PerformanceFromDB } from "@/types/Event";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export const getPerformanceFromEvent = async (
   eventId: string,

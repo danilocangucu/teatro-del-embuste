@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export const createUser = async (
   fullName: string,
@@ -38,4 +36,4 @@ export const getUser = async (userId: string) => {
     console.error("[getUser] Error fetching user:", error);
     throw new Error("[getUser] Failed to fetch user");
   }
-}
+};
