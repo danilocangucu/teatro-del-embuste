@@ -183,3 +183,17 @@ export async function GET(req: Request) {
     },
   });
 }
+
+export async function DELETE(req: Request) {
+  const { eventId, performanceId } = await req.json();
+
+  const key = `ticket-reservation-${eventId}-${performanceId}`;
+  const response = NextResponse.json({ success: true });
+
+  response.cookies.set(key, "", {
+    path: "/",
+    maxAge: 0,
+  });
+
+  return response;
+}

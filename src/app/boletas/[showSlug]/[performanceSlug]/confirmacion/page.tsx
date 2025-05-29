@@ -110,7 +110,7 @@ export default async function ConfirmacionPage({
   return (
     <>
       <Stepper currentStep="Confirmación" />
-      <ResultComponent reservation={reservation} />
+      <ResultComponent reservation={reservation} eventId={event.id} performanceId={performance.id} />
     </>
   );
 }
