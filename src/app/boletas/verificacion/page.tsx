@@ -8,11 +8,17 @@ import {
   getEventIdByPerformanceId,
   getPerformanceByReservationId,
 } from "@/services/performanceService";
-import { getShowIdByEventId } from "@/services/eventService";
+import {
+  getDefaultTimeByEventId,
+  getShowIdByEventId,
+} from "@/services/eventService";
 import { getShowSlugFromShowId } from "@/services/showService";
 import { reservation_status } from "@prisma/client";
-
-// TODO how could I block access to this page if someone puts a fake bold-order-id in the URL?
+import {
+  formatDateTimeForURL,
+  getISODate,
+  getISOTime,
+} from "@/utils/eventUtils";
 
 const TICKET_SUFIX = process.env.TICKET_SUFIX!;
 
@@ -36,105 +42,124 @@ export default async function Home({ searchParams }: Props) {
 
   const boldOrderIdWithoutSufix = boldOrderId.replace(TICKET_SUFIX, "");
 
-  // TODO retry to fetch reservation,
   const reservation = await getReservation(boldOrderIdWithoutSufix);
 
   if (!reservation) {
     console.warn(
-      "[VERIFICACION] No reservation found for bold-order-id:",
+      "[VERIFICACION] No reservation found for bold-order-id YET:",
       boldOrderId
     );
-  } else {
-    console.log("[VERIFICACION] Reservation fetched:", reservation);
-    if (reservation.status !== reservation_status.confirmed) {
-      console.warn(
-        "[VERIFICACION] Reservation status is not confirmed, current status:",
-        reservation.status
-      );
-      return (
-    <>
-      <Stepper currentStep="Verificación" />
-      <PollingReservation boldOrderId={boldOrderId}/>
-    </>
-      )
-    }
+    return (
+      <>
+        <Stepper currentStep="Verificación" />
+        <PollingReservation boldOrderIdWithoutSufix={boldOrderIdWithoutSufix} />
+      </>
+    );
+  }
+  if (
+    reservation.status !== reservation_status.confirmed &&
+    reservation.status !== reservation_status.cancelled
+  ) {
+    console.warn(
+      "[VERIFICACION] Reservation status is not confirmed or cancelled, current status:",
+      reservation.status
+    );
+    return (
+      <>
+        <Stepper currentStep="Verificación" />
+        <PollingReservation boldOrderIdWithoutSufix={boldOrderIdWithoutSufix} />
+      </>
+    );
+  }
 
-    const eventId = await getEventIdByPerformanceId(reservation.performance_id);
+  const eventId = await getEventIdByPerformanceId(reservation.performance_id);
 
-    if (!eventId) {
-      console.warn(
-        "[VERIFICACION] No event found for performance_id:",
-        reservation.performance_id
-      );
-      notFound();
-    }
-    // Get reservation from cookie
-    const reqHeaders = await headers();
-    console.log("[VERIFICACION] Request headers obtained");
-    // TODO verificacion should also check if user is the same from the cookie & reservation
-    const reservationFromCookie = await getReservationFromCookieViaHeaders(
-      reqHeaders,
-      eventId,
+  if (!eventId) {
+    console.warn(
+      "[VERIFICACION] No event found for performance_id:",
       reservation.performance_id
     );
-    if (!reservationFromCookie) {
-      console.warn("[VERIFICACION] No reservation found in cookie");
-      notFound();
-    }
-    console.log(
-      "[VERIFICACION] Reservation from cookie:",
-      reservationFromCookie
-    );
-
-    if (reservationFromCookie.reservationId !== reservation.id) {
-      console.warn(
-        "[VERIFICACION] Reservation ID mismatch between cookie and database"
-      );
-      notFound();
-    }
-
-    // TODO verification should check if expiresAt is still valid
-
-    const performance = await getPerformanceByReservationId(reservation.id);
-    if (!performance) {
-      console.warn(
-        "[VERIFICACION] No performance found for reservation ID:",
-        reservation.id
-      );
-      notFound();
-    }
-
-    console.log("[VERIFICACION] Performance fetched:", performance);
-
-    const showId = await getShowIdByEventId(eventId);
-
-    if (!showId) {
-      console.warn("[VERIFICACION] No show found for event ID:", eventId);
-      notFound();
-    }
-
-    console.log("[VERIFICACION] Show ID fetched:", showId);
-
-    const showSlug = await getShowSlugFromShowId(showId);
-
-    if (!showSlug) {
-      console.warn("[VERIFICACION] No show slug found for show ID:", showId);
-      notFound();
-    }
-
-    console.log("[VERIFICACION] Show slug fetched:", showSlug);
-
-    // TODO check how to make the performanceSlug
-    // const performanceSlug = formatDateTimeForURL(performance.date.toISOString(), performance.time!.toISOString());
-
-    const performanceSlug = "07-06-25-6PM";
-
-    console.log("[VERIFICACION] Performance slug formatted:", performanceSlug);
-
-    console.log(
-      "[VERIFICACION] Reservation verified, redirecting to /confirmacion"
-    );
-
-    redirect(`/boletas/${showSlug}/${performanceSlug}/confirmacion`);
+    notFound();
   }
+
+  const reqHeaders = await headers();
+  console.log("[VERIFICACION] Request headers obtained");
+
+  const reservationFromCookie = await getReservationFromCookieViaHeaders(
+    reqHeaders,
+    eventId,
+    reservation.performance_id
+  );
+  if (!reservationFromCookie) {
+    console.warn("[VERIFICACION] No reservation found in cookie");
+    notFound();
+  }
+  console.log("[VERIFICACION] Reservation from cookie:", reservationFromCookie);
+
+  if (reservationFromCookie.reservationId !== reservation.id) {
+    console.warn(
+      "[VERIFICACION] Reservation ID mismatch between cookie and database"
+    );
+    notFound();
+  }
+
+  if (reservationFromCookie.userId !== reservation.user_id) {
+    console.warn(
+      "[VERIFICACION] User ID mismatch between cookie and reservation"
+    );
+    notFound();
+  }
+
+  // TODO verification should check if expiresAt is still valid
+
+  const performance = await getPerformanceByReservationId(reservation.id);
+  if (!performance) {
+    console.warn(
+      "[VERIFICACION] No performance found for reservation ID:",
+      reservation.id
+    );
+    notFound();
+  }
+
+  console.log("[VERIFICACION] Performance fetched:", performance);
+
+  const showId = await getShowIdByEventId(eventId);
+
+  if (!showId) {
+    console.warn("[VERIFICACION] No show found for event ID:", eventId);
+    notFound();
+  }
+
+  console.log("[VERIFICACION] Show ID fetched:", showId);
+
+  const showSlug = await getShowSlugFromShowId(showId);
+
+  if (!showSlug) {
+    console.warn("[VERIFICACION] No show slug found for show ID:", showId);
+    notFound();
+  }
+
+  console.log("[VERIFICACION] Show slug fetched:", showSlug);
+
+  let eventDefaultTime;
+  if (!performance.time) {
+    console.warn(
+      "[VERIFICACION] Performance time is not set, using event default time"
+    );
+    eventDefaultTime = await getDefaultTimeByEventId(eventId);
+  }
+
+  const performanceTime = performance.time || eventDefaultTime!;
+  const performanceSlug = formatDateTimeForURL(
+    getISODate(performance.date),
+    getISOTime(performanceTime)
+  );
+
+  console.log("[VERIFICACION] Performance slug formatted:", performanceSlug);
+
+  console.log(
+    "[VERIFICACION] Reservation verified, redirecting to /confirmacion"
+  );
+
+  redirect(`/boletas/${showSlug}/${performanceSlug}/confirmacion`);
 }
