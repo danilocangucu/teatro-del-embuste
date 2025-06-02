@@ -5,13 +5,13 @@ export const sanitizeEvent = (event: EventFromDB): EventDTO => {
     startDate: event.start_date.toISOString().split("T")[0],
     endDate: event.end_date.toISOString().split("T")[0],
     isPremiere: event.is_premiere ?? false,
-    defaultTime: event.default_time?.toISOString().slice(11, 16),
+    defaultTime: event.default_time.toISOString().slice(11, 16),
     totalSeats: event.total_seats,
 
     performances: event.performances.map((performance: PerformanceFromDB) => ({
       id: performance.id,
-      date: performance.date.toISOString().split("T")[0],
-      time: performance.time?.toISOString().slice(11, 16),
+      date: getISODate(performance.date),
+      time: getISOTime(performance.time ? performance.time : event.default_time),
       availableSeats: performance.available_seats,
     })),
 
@@ -141,4 +141,12 @@ export function getPerformanceSlugAndDate(
     formattedDate: getFormattedDate(date, time),
     performanceSlug: formatDateTimeForURL(date, time),
   };
+}
+
+export function getISODate(date: Date): string {
+  return date.toISOString().split("T")[0]; // "2025-06-07"
+}
+
+export function getISOTime(time: Date): string {
+  return time.toISOString().slice(11, 16); // "18:00"
 }
