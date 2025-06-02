@@ -85,3 +85,16 @@ export const getShowIdByEventId = async (eventId: string) => {
 
   return event.show_id;
 };
+
+export const getDefaultTimeByEventId = async (eventId: string) => {
+  const event = await prisma.events.findUnique({
+    where: { id: eventId },
+    select: { default_time: true },
+  });
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  return event.default_time;
+};
