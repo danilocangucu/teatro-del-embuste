@@ -165,7 +165,7 @@ export default async function IdentidadPage({
   return (
     <>
       <Stepper currentStep="Identidad" />
-      <UserOptions reservationId={reservationFromCookie.reservationId} eventId={event.id} performanceId={performance.id} />
+      <UserOptions reservationId={reservationFromCookie.reservationId} eventId={event.id} performanceId={performance.id} showSlug={showSlug} performanceSlug={performanceSlug} />
     </>
   );
 }

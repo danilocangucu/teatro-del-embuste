@@ -4,14 +4,12 @@ import React, { useState } from "react";
 import { Button } from "../shared/Button";
 import { useRouter } from "next/navigation";
 
-export function UserOptions({ reservationId, eventId, performanceId }: { reservationId: string, eventId: string, performanceId: string }) {
+// TODO UserOptions showSlug and performanceSlug can come from query params
+export function UserOptions({ reservationId, eventId, performanceId, showSlug, performanceSlug }: { reservationId: string, eventId: string, performanceId: string, showSlug: string, performanceSlug: string }) {
   const [selected, setSelected] = useState<"login" | "create" | "guest">(
     "guest"
   );
   const [isSubmittingGuest, setIsSubmittingGuest] = useState(false);
-  // TODO : Replace with actual slug logic
-  const showSlug = "la-secreta";
-  const performanceSlug = "07-06-25-6PM";
   const router = useRouter();
   console.log("[UserOptions] setSelected:", setSelected);
 
