@@ -71,7 +71,7 @@ export default async function PerformancePage({
     console.error("Error fetching performance:", err);
   }
 
-  // TODO reminder: handle more discount cases
+  // TODO could be necessary to handle more discount cases
   const discountRule = mappedEvent.discountRules?.find(
     (rule) => rule.type === "time_based"
   );

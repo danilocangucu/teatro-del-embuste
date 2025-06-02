@@ -24,7 +24,6 @@ export default async function RevisionPage({
 
   console.log("Starting RevisiónPage for:", { showSlug, performanceSlug });
 
-  // Fetch show and event info
   let showId: string;
   let showTitle: string;
   try {
@@ -44,12 +43,13 @@ export default async function RevisionPage({
     notFound();
   }
 
-  // Parse performance slug
   const { performanceDate, performanceTime } =
     parsePerformanceSlug(performanceSlug);
-  console.log("[Revisión] Parsed performance slug:", { performanceDate, performanceTime });
+  console.log("[Revisión] Parsed performance slug:", {
+    performanceDate,
+    performanceTime,
+  });
 
-  // Get performance
   let performance;
   try {
     performance = await getPerformanceFromEvent(
@@ -72,21 +72,20 @@ export default async function RevisionPage({
     notFound();
   }
 
-  // Get reservation from cookie
   const reqHeaders = await headers();
-  console.log("[Revisión] Request headers obtained");
+
   const reservationFromCookie = await getReservationFromCookieViaHeaders(
     reqHeaders,
     event.id,
     performance.id
   );
+
   if (!reservationFromCookie) {
     console.warn("[Revisión] No reservation found in cookie");
     notFound();
   }
   console.log("[Revisión] Reservation from cookie:", reservationFromCookie);
 
-  // Check reservation expiration
   const now = new Date();
   if (reservationFromCookie.expiresAt < now) {
     console.warn(
@@ -107,11 +106,13 @@ export default async function RevisionPage({
   const user = await getUser(reservationFromCookie.userId);
 
   if (!user) {
-    console.warn("[Revisión] User not found for userId:", reservationFromCookie.userId);
+    console.warn(
+      "[Revisión] User not found for userId:",
+      reservationFromCookie.userId
+    );
     notFound();
   }
 
-  // Fetch reservation from DB
   const reservationFromDB = await getReservation(
     reservationFromCookie.reservationId
   );
@@ -124,7 +125,6 @@ export default async function RevisionPage({
   }
   console.log("[Revisión] Reservation from DB:", reservationFromDB);
 
-  // TODO check if other pages are checking reservationFromCookie.userId !== reservationFromDB.id
   if (reservationFromCookie.reservationId !== reservationFromDB.id) {
     console.warn(
       "[Revisión] Reservation ID mismatch between cookie and DB:",
@@ -166,7 +166,6 @@ export default async function RevisionPage({
   }
   console.log("[Revisión] Reservation matches performance");
 
-  // Check reservation status
   if (reservationFromDB.status !== "reviewing") {
     console.warn(
       "[Revisión] Reservation status not 'reviewing':",
@@ -194,27 +193,26 @@ export default async function RevisionPage({
   }
   console.log("[Revisión] At least one reservation item has quantity >= 1");
 
-  // TODO filter items that are quantity less than 1
   const validReservationItems = reservationItems.filter(
     (item) => item.quantity >= 1
   );
 
-  // TODO check which reservation items have discount and the discount ids in variables to be fetched afterwards. they need to have ticket_type also so I can show the correct price in the review
-const discountedItems = validReservationItems.filter(item => item.discount_id !== null);
-const discountTicketMap = new Map<string, Set<$Enums.ticket_type>>();
-for (const item of discountedItems) {
-  if (item.discount_id) {
-    if (!discountTicketMap.has(item.discount_id)) {
-      discountTicketMap.set(item.discount_id, new Set());
+  const discountedItems = validReservationItems.filter(
+    (item) => item.discount_id !== null
+  );
+  const discountTicketMap = new Map<string, Set<$Enums.ticket_type>>();
+  for (const item of discountedItems) {
+    if (item.discount_id) {
+      if (!discountTicketMap.has(item.discount_id)) {
+        discountTicketMap.set(item.discount_id, new Set());
+      }
+      discountTicketMap.get(item.discount_id)!.add(item.ticket_type);
     }
-    discountTicketMap.get(item.discount_id)!.add(item.ticket_type);
   }
-}
 
-// Extract unique discount IDs to fetch
-const discountIdsToFetch = [...discountTicketMap.keys()];
-    
-const discounts = await getDiscountsByIds(discountIdsToFetch);
+  const discountIdsToFetch = [...discountTicketMap.keys()];
+
+  const discounts = await getDiscountsByIds(discountIdsToFetch);
 
   if (!discounts || discounts.length === 0) {
     console.warn("[Revisión] No discounts found for reservation items");
@@ -223,27 +221,36 @@ const discounts = await getDiscountsByIds(discountIdsToFetch);
 
   console.log("[Revisión] Discounts fetched:", discounts);
 
-  const discountLookup = new Map(discounts.map(d => [d.id, d]));
+  const discountLookup = new Map(discounts.map((d) => [d.id, d]));
 
-const enrichedReservationItems = validReservationItems.map(item => {
-  const discount = item.discount_id ? discountLookup.get(item.discount_id) : null;
+  const enrichedReservationItems = validReservationItems.map((item) => {
+    const discount = item.discount_id
+      ? discountLookup.get(item.discount_id)
+      : null;
 
-  return {
-    ...item,
-    discount: discount
-      ? {
+    return {
+      ...item,
+      discount: discount
+        ? {
           ...discount,
-          value: discount.value.toNumber(), // or .toString() if you prefer string
+          value: discount.value.toNumber(),
         }
-      : null,
-  };
-});
+        : null,
+    };
+  });
 
-  // All validations passed — reflect current valid state
   return (
     <>
       <Stepper currentStep="Revisión" />
-      <Review showTitle={showTitle} performance={performance} reservation={reservationFromDB} reservationItems={enrichedReservationItems} user={user} showSlug={showSlug} performanceSlug={performanceSlug}/>
+      <Review
+        showTitle={showTitle}
+        performance={performance}
+        reservation={reservationFromDB}
+        reservationItems={enrichedReservationItems}
+        user={user}
+        showSlug={showSlug}
+        performanceSlug={performanceSlug}
+      />
     </>
   );
 }
