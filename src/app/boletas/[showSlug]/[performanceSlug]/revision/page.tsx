@@ -13,7 +13,7 @@ import {
 import { Stepper } from "@/components/shared/Stepper";
 import { Review } from "@/components/Ticket/Review";
 import { getUser } from "@/services/userService";
-import { $Enums } from "@prisma/client";
+import { $Enums, reservation_status } from "@prisma/client";
 
 export default async function RevisionPage({
   params,
@@ -166,7 +166,7 @@ export default async function RevisionPage({
   }
   console.log("[Revisión] Reservation matches performance");
 
-  if (reservationFromDB.status !== "reviewing") {
+  if (reservationFromDB.status !== reservation_status.reviewing) {
     console.warn(
       "[Revisión] Reservation status not 'reviewing':",
       reservationFromDB.status

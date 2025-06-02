@@ -192,14 +192,17 @@ async function processWebhook(req: Request) {
 
   const reservationStatus =
     event.paymentStatus === "SALE_APPROVED"
-      ? "confirmed"
+      ? reservation_status.confirmed
       : event.paymentStatus === "SALE_REJECTED"
-      ? "cancelled"
+      ? reservation_status.cancelled
       : event.paymentStatus === "VOID_APPROVED"
-      ? "cancellation_approved"
-      : "cancellation_denied";
+      ? reservation_status.cancellation_approved
+      : reservation_status.cancellation_denied;
 
-  if (reservationStatus !== "cancelled" && reservationStatus !== "confirmed") {
+  if (
+    reservationStatus !== reservation_status.cancelled &&
+    reservationStatus !== reservation_status.confirmed
+  ) {
     console.warn(
       `[Webhook] ⚠️ Updating reservation ${event.reservationId} status to ${reservationStatus}`
     );

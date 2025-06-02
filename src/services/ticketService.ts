@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 
 import { TicketType } from "@/types/Event";
+import { reservation_status } from "@prisma/client";
 
 export const createReservation = async (
   performanceId: string,
-  status: "pending",
+  status: reservation_status = reservation_status.selecting,
   userId: null
 ) => {
   const now = new Date();
@@ -132,7 +133,7 @@ export const updateReservationQuantityAndSeats = async (
 
 export const updateReservationStatus = async (
   reservationId: string,
-  status: "pending" | "reviewing" | "confirmed" | "cancelled" | "expired"
+  status: reservation_status
 ) => {
   const updatedReservation = await prisma.reservations.update({
     where: { id: reservationId },
@@ -188,11 +189,7 @@ export const updateReservationAndItemsTotalPrices = async (
 
 export const updateReservationStatusAndPaymentId = async (
   reservationId: string,
-  status:
-    | "confirmed"
-    | "cancelled"
-    | "cancellation_approved"
-    | "cancellation_denied",
+  status: reservation_status,
   boldPaymentId: string
 ) => {
   const updatedReservation = await prisma.reservations.update({

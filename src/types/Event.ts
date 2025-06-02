@@ -1,3 +1,4 @@
+import { reservation_status } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 
 export type EventDTO = {
@@ -61,7 +62,7 @@ export type ReservationDTO = {
   totalPrice: number; // Total price after applying discounts
 };
 
-type ReservationStatus = "pending" | "confirmed" | "expired" | "cancelled";
+type ReservationStatus = reservation_status;
 
 export type EventFromDB = {
   id: string;

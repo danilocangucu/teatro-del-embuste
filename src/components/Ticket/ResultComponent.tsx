@@ -1,5 +1,6 @@
 "use client";
 
+import { reservation_status } from "@prisma/client";
 import { useEffect } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,7 +44,7 @@ export function ResultComponent({ reservation, eventId, performanceId }: { reser
     );
   }
 
-  if (reservation.status === "confirmed") {
+  if (reservation.status === reservation_status.confirmed) {
     return (
       <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
         <h1>Reserva Confirmada</h1><br /><br /><br />
@@ -54,7 +55,7 @@ export function ResultComponent({ reservation, eventId, performanceId }: { reser
     );
   }
 
-  if (reservation.status === "expired") {
+  if (reservation.status === reservation_status.expired) {
     return (
       <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
         <h1>Reserva Expirada</h1><br /><br /><br />
@@ -65,7 +66,7 @@ export function ResultComponent({ reservation, eventId, performanceId }: { reser
     );
   }
 
-  if (reservation.status === "cancelled") {
+  if (reservation.status === reservation_status.cancelled) {
     return (
       <div style={{ marginTop: 40, marginLeft: 40, fontFamily: "sans-serif", maxWidth: 500 }}>
         <h1>Reserva Cancelada</h1><br /><br /><br />
@@ -75,7 +76,6 @@ export function ResultComponent({ reservation, eventId, performanceId }: { reser
       </div>
     );
   }
-
 
   return (
     <div>

@@ -7,7 +7,7 @@ import {
 } from "@/services/ticketService";
 import { DiscountDTO } from "@/types/Event";
 import { getDiscountedPrice } from "@/utils/sharedUtils";
-import { ticket_type } from "@prisma/client";
+import { reservation_status, ticket_type } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function PUT(req: Request) {
@@ -28,7 +28,10 @@ export async function PUT(req: Request) {
     );
   }
 
-  if (reservation.status !== "pending" && reservation.status !== "reviewing") {
+  if (
+    reservation.status !== reservation_status.selecting &&
+    reservation.status !== reservation_status.reviewing
+  ) {
     return NextResponse.json(
       { error: "Reservation is not in a valid state for review" },
       { status: 400 }
@@ -47,8 +50,8 @@ export async function PUT(req: Request) {
   }
 
   // Update the reservation status to 'reviewing'
-  if (reservation.status !== "reviewing") {
-    await updateReservationStatus(reservationId, "reviewing");
+  if (reservation.status !== reservation_status.reviewing) {
+    await updateReservationStatus(reservationId, reservation_status.reviewing);
     console.log(`Updating reservation ${reservationId} status to 'reviewing'`);
   }
 

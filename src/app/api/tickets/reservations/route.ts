@@ -14,6 +14,7 @@ import {
   getISODate,
   getISOTime,
 } from "@/utils/eventUtils";
+import { reservation_status } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -120,8 +121,8 @@ export async function GET(req: Request) {
   }
 
   if (
-    reservation.status !== "confirmed" &&
-    reservation.status !== "cancelled"
+    reservation.status !== reservation_status.confirmed &&
+    reservation.status !== reservation_status.cancelled
   ) {
     console.warn(
       "⚠️ Reservation status is not confirmed or cancelled:",

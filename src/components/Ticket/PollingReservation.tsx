@@ -1,5 +1,6 @@
 "use client";
 
+import { reservation_status } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -31,7 +32,7 @@ export function PollingReservation({ boldOrderIdWithoutSufix }: { boldOrderIdWit
           if (data.reservation) {
             console.log("[POLLING RESERVATION] Reservation found:", data.reservation);
 
-            if (data.reservation.status === "confirmed" || data.reservation.status === "cancelled") {
+            if (data.reservation.status === reservation_status.confirmed || data.reservation.status === reservation_status.cancelled) {
               console.log(
                 "[POLLING RESERVATION] Reservation confirmed, stopping polling."
               );

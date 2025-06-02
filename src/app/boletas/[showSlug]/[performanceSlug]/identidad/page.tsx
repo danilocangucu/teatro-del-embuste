@@ -11,6 +11,7 @@ import {
 } from "@/services/ticketService";
 import { UserOptions } from "@/components/Ticket/UserOptions";
 import { Stepper } from "@/components/shared/Stepper";
+import { reservation_status } from "@prisma/client";
 
 // TODO should check if there is an userId in the cookie. if there is, could mean that the user want's to edit their info so load Identidad with user info. activates the "edit" mode and button to save changes should only be active if there are changes made
 
@@ -134,7 +135,7 @@ export default async function IdentidadPage({
   console.log("Reservation matches performance");
 
   // Check reservation status
-  if (reservationFromDB.status !== "reviewing") {
+  if (reservationFromDB.status !== reservation_status.reviewing) {
     console.warn(
       "Reservation status not 'reviewing':",
       reservationFromDB.status

@@ -300,11 +300,13 @@ enum discount_type {
 }
 
 enum reservation_status {
-  pending
+  selecting
+  identifying
+  reviewing
+  paying
   confirmed
   expired
   cancelled
-  reviewing
   cancellation_approved
   cancellation_denied
 }

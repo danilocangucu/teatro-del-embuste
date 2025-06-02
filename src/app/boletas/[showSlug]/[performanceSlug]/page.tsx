@@ -20,6 +20,7 @@ import {
 } from "@/services/ticketService";
 import { headers } from "next/headers";
 import { getReservationFromCookieViaHeaders, getServersTimeNow } from "@/services/cookieService";
+import { reservation_status } from "@prisma/client";
 
 // TODO performance page should not create a new reservation if there is no reservation in cookie & available seats of performance === 0
 export default async function PerformancePage({
@@ -110,7 +111,7 @@ let timeNow = new Date();
     } else {
       const createdReservation = await createReservation(
         performanceInEvent.id,
-        "pending",
+        reservation_status.selecting,
         null,
       );
       reservationId = createdReservation.id;
