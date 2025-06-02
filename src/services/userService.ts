@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 export const createUser = async (
   fullName: string,
   email: string,
+  phone: string,
   isGuest: boolean,
   reservationId: string
 ) => {
@@ -11,6 +12,7 @@ export const createUser = async (
       data: {
         full_name: fullName,
         email,
+        phone,
         is_guest: isGuest,
         reservation_id: reservationId,
       },

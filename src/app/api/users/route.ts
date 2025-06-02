@@ -3,16 +3,23 @@ import { createUser } from "@/services/userService";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { fullName, email, isGuest, reservationId } = await req.json();
+  const { fullName, email, phone, isGuest, reservationId } = await req.json();
 
   console.log("[/api/users POST] Received user data:", {
     fullName,
     email,
+    phone,
     isGuest,
     reservationId,
   });
 
-  const userId = await createUser(fullName, email, isGuest, reservationId);
+  const userId = await createUser(
+    fullName,
+    email,
+    phone,
+    isGuest,
+    reservationId
+  );
 
   if (!userId) {
     console.error("[/api/users POST] Failed to create user");
