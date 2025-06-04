@@ -66,7 +66,8 @@ export async function PATCH(req: Request) {
 
   if (
     reservation.status !== reservation_status.selecting &&
-    reservation.status !== reservation_status.reviewing
+    reservation.status !== reservation_status.reviewing &&
+    reservation.status !== reservation_status.identifying
   ) {
     return NextResponse.json(
       { error: "Reservation is not in a valid state" },

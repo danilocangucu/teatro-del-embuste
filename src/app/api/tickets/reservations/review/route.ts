@@ -30,6 +30,7 @@ export async function PUT(req: Request) {
 
   if (
     reservation.status !== reservation_status.selecting &&
+    reservation.status !== reservation_status.identifying &&
     reservation.status !== reservation_status.reviewing
   ) {
     return NextResponse.json(
