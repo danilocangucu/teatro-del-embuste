@@ -51,9 +51,9 @@ export async function PUT(req: Request) {
   }
 
   // Update the reservation status to 'reviewing'
-  if (reservation.status !== reservation_status.reviewing) {
-    await updateReservationStatus(reservationId, reservation_status.reviewing);
-    console.log(`Updating reservation ${reservationId} status to 'reviewing'`);
+  if (reservation.status !== reservation_status.selecting) {
+    await updateReservationStatus(reservationId, reservation_status.selecting);
+    console.log(`Updating reservation ${reservationId} status to 'selecting'`);
   }
 
   const reservationItems = await getReservationItemsByReservationId(
