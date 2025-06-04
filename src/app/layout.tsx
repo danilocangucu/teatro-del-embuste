@@ -2,6 +2,8 @@
 
 import type { Metadata } from "next";
 import "../styles/globals.css";
+import NextTopLoader from 'nextjs-toploader';
+
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer/Footer";
 import Script from "next/script";
@@ -35,6 +37,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <NextTopLoader color="#ffd700" showSpinner={false} shadow={"0 0 10px #4c4000,0 0 5px #4c4000"} />
         <Navbar />
         {children}
         <Footer />
