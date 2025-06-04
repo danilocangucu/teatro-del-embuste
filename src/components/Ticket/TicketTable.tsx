@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { PricingDTO, DiscountRuleDTO } from "@/types/Event";
 import { getDiscountedPrice } from "@/utils/sharedUtils";
 import { useParams } from "next/navigation";
-import { useRouter } from 'nextjs-toploader/app';
-import { useTopLoader } from 'nextjs-toploader';
-
+import { useRouter } from "nextjs-toploader/app";
+import { useTopLoader } from "nextjs-toploader";
 
 import { Button } from "../shared/Button";
 import { reservation_status } from "@prisma/client";
-import Link from "next/link";
 
 type TicketType = "standard" | "student" | "senior";
 
@@ -60,10 +58,18 @@ export function TicketTable({
   const params = useParams();
   const loader = useTopLoader();
 
-
-  const handleButtonClick = async () => {
+  const updateReservationAndNavigate = async ({
+    destination,
+    onStart,
+    onEnd,
+  }: {
+    destination: string;
+    onStart?: () => void;
+    onEnd?: () => void;
+  }) => {
     loader.start();
-    setOnIdentidadClicked(true);
+    onStart?.();
+
     setIsLoading(true);
     try {
       const res = await fetch("/api/tickets/reservations/review", {
@@ -76,22 +82,33 @@ export function TicketTable({
         const errorData = await res.json();
         console.error("Failed to update reservation for review:", errorData);
         setIsLoading(false);
-        setOnIdentidadClicked(false);
-        return; // exit without navigating
+        return;
       }
 
       console.log("Reservation updated successfully");
-      router.push(`/boletas/${showSlug}/${performanceSlug}/identidad`);
+      router.push(destination);
     } catch (error) {
       console.error("Unexpected error updating reservation:", error);
       setIsLoading(false);
-      setOnIdentidadClicked(false);
+      onEnd?.();
     }
   };
 
+  const handleButtonClick = () => {
+    updateReservationAndNavigate({
+      destination: `/boletas/${showSlug}/${performanceSlug}/identidad`,
+      onStart: () => setOnIdentidadClicked(true),
+      onEnd: () => setOnIdentidadClicked(false),
+    });
+  };
+
   const handleRevisarClick = () => {
-    setOnRevisarClicked(true);
-  }
+    updateReservationAndNavigate({
+      destination: `/boletas/${showSlug}/${performanceSlug}/revision`,
+      onStart: () => setOnRevisarClicked(true),
+      onEnd: () => setOnRevisarClicked(false),
+    });
+  };
 
   useEffect(() => {
     if (!reservationWasCreatedNow && reservation.items.length > 0) {
@@ -354,24 +371,30 @@ export function TicketTable({
               </tr>
             </tfoot>
           </table>
-          <Button onClick={handleButtonClick} disabled={!isButtonActive || isLoading || onRevisarClicked || onIdentidadClicked}>
+          <Button
+            onClick={handleButtonClick}
+            disabled={
+              !isButtonActive ||
+              isLoading ||
+              onRevisarClicked ||
+              onIdentidadClicked
+            }
+          >
             {onIdentidadClicked
               ? "Cargando..."
               : reservation.status === reservation_status.reviewing
                 ? "Editar Identidad"
                 : "Continuar a Identidad"}
           </Button>
-          {isButtonActive && reservation.status === reservation_status.reviewing && (
-            <Link href={`/boletas/${showSlug}/${performanceSlug}/revision`}>
-              <Button disabled={isLoading || onRevisarClicked || onIdentidadClicked} onClick={handleRevisarClick}>
-                {onRevisarClicked
-                  ? "Cargando..."
-                  : "Revisar Pedido"
-                }
+          {isButtonActive &&
+            reservation.status === reservation_status.reviewing && (
+              <Button
+                disabled={isLoading || onRevisarClicked || onIdentidadClicked}
+                onClick={handleRevisarClick}
+              >
+                {onRevisarClicked ? "Cargando..." : "Revisar Pedido"}
               </Button>
-            </Link>
-          )
-          }
+            )}
         </>
       )}
     </>
