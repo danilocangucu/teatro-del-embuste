@@ -3,11 +3,16 @@
 import { useEffect, useState } from "react";
 import { PricingDTO, DiscountRuleDTO } from "@/types/Event";
 import { getDiscountedPrice } from "@/utils/sharedUtils";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "../shared/Button";
+import { useParams } from "next/navigation";
+import { useRouter } from 'nextjs-toploader/app';
+import { useTopLoader } from 'nextjs-toploader';
 
-// TODO senior should be gone
-type TicketType = "standard" | "student" | "senior"; // Enum-like union type
+
+import { Button } from "../shared/Button";
+import { reservation_status } from "@prisma/client";
+import Link from "next/link";
+
+type TicketType = "standard" | "student" | "senior";
 
 interface Props {
   pricing: PricingDTO[];
@@ -19,6 +24,7 @@ interface Props {
       id: string;
       ticketType: TicketType;
     }[];
+    status: reservation_status | null;
   };
   reservationWasCreatedNow: boolean;
   availableSeatsNow: number;
@@ -39,50 +45,55 @@ export function TicketTable({
   const [quantities, setQuantities] = useState<Record<TicketType, number>>({
     standard: 0,
     student: 0,
-    senior: 0
+    senior: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [initialReservedTickets, setInitialReservedTickets] =
     useState<number>(0);
   const [availableSeats, setAvailableSeats] = useState(availableSeatsNow);
+  const [showSlug, setShowSlug] = useState<string>("");
+  const [performanceSlug, setPerformanceSlug] = useState<string>("");
+  const [onRevisarClicked, setOnRevisarClicked] = useState(false);
+  const [onIdentidadClicked, setOnIdentidadClicked] = useState(false);
 
   const router = useRouter();
-    const params = useParams();
+  const params = useParams();
+  const loader = useTopLoader();
 
 
   const handleButtonClick = async () => {
-  const { showSlug, performanceSlug } = await params;
+    loader.start();
+    setOnIdentidadClicked(true);
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/tickets/reservations/review", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId: reservation.id }),
+      });
 
-  console.log("////////////////")
-  console.log("showSlug/performanceSlug", `${showSlug}/${performanceSlug}`);
-    console.log("////////////////")
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Failed to update reservation for review:", errorData);
+        setIsLoading(false);
+        setOnIdentidadClicked(false);
+        return; // exit without navigating
+      }
 
-  try {
-    const res = await fetch("/api/tickets/reservations/review", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reservationId: reservation.id }),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      console.error("Failed to update reservation for review:", errorData);
-      return; // exit without navigating
+      console.log("Reservation updated successfully");
+      router.push(`/boletas/${showSlug}/${performanceSlug}/identidad`);
+    } catch (error) {
+      console.error("Unexpected error updating reservation:", error);
+      setIsLoading(false);
+      setOnIdentidadClicked(false);
     }
+  };
 
-    console.log("Reservation updated successfully");
-    router.push(`/boletas/${showSlug}/${performanceSlug}/identidad`);
-  } catch (error) {
-    console.error("Unexpected error updating reservation:", error);
+  const handleRevisarClick = () => {
+    setOnRevisarClicked(true);
   }
-};
 
-  console.log("reservationWasCreatedNow", reservationWasCreatedNow);
-  console.log("reservations.items.length", reservation.items.length);
   useEffect(() => {
-    console.log("---------------------");
-    console.log("useEffect 1");
-    console.log("---------------------");
     if (!reservationWasCreatedNow && reservation.items.length > 0) {
       setIsLoading(true);
       const fetchReservationItems = async () => {
@@ -105,7 +116,7 @@ export function TicketTable({
           }
 
           const data = await res.json();
-          setReservationItems(data.reservationItems); // or whatever your API returns
+          setReservationItems(data.reservationItems);
 
           const totalReserved = data.reservationItems.reduce(
             (acc: number, item: { quantity: number }) => acc + item.quantity,
@@ -123,13 +134,7 @@ export function TicketTable({
     }
   }, [reservationWasCreatedNow, reservation.items]);
 
-  console.log("reservationItems in TicketTable", reservationItems);
-
   useEffect(() => {
-    console.log("---------------------");
-    console.log("useEffect 2");
-    console.log("---------------------");
-
     if (reservationItems.length > 0) {
       const standardItem = reservationItems.find(
         (item) => item.ticketType === "standard"
@@ -138,16 +143,22 @@ export function TicketTable({
         (item) => item.ticketType === "student"
       );
 
-      // TODO senior should be gone
       setQuantities({
         standard: standardItem ? standardItem.quantity : 0,
         student: studentItem ? studentItem.quantity : 0,
-        senior: 0
+        senior: 0,
       });
     }
   }, [reservationItems]);
 
-  console.log("quantities", quantities);
+  useEffect(() => {
+    if (params.showSlug) {
+      setShowSlug(params.showSlug as string);
+    }
+    if (params.performanceSlug) {
+      setPerformanceSlug(params.performanceSlug as string);
+    }
+  }, [params.showSlug, params.performanceSlug]);
 
   const formatCOP = (amount: number) =>
     amount.toLocaleString("es-CO", {
@@ -176,10 +187,6 @@ export function TicketTable({
     type: TicketType,
     newQuantity: number
   ) => {
-    console.log("++++++++++++++++");
-    console.log("handleQuantityChange", type, newQuantity);
-    console.log("reservationItems", reservationItems);
-    console.log("+++++++++++++++++");
     const item = reservationItems.find((i) => i.ticketType === type);
 
     if (!item) {
@@ -208,9 +215,8 @@ export function TicketTable({
         return;
       }
 
-      const data = await res.json(); // { reservationItemQuantity, availableSeats }
+      const data = await res.json();
 
-      // 1. Update quantities
       setQuantities((prev) => ({
         ...prev,
         [type]: data.reservationItemQuantity,
@@ -223,7 +229,7 @@ export function TicketTable({
             : ri
         )
       );
-      // 2. Update initialReservedTickets (difference of change)
+
       setInitialReservedTickets(
         (prev) => prev + (data.reservationItemQuantity - prevQuantity)
       );
@@ -242,11 +248,7 @@ export function TicketTable({
     maxSelectableTickets === 0 &&
     availableSeatsNow === 0;
 
-  console.log("reservation.id", reservation.id);
-
   const isButtonActive = reservationItems.some((item) => item.quantity > 0);
-
-  console.log("isButtonActive", isButtonActive);
 
   return (
     <>
@@ -306,7 +308,7 @@ export function TicketTable({
                     <td>
                       <select
                         disabled={
-                          isLoading || // disable while loading
+                          isLoading ||
                           quantities[
                             type === "standard" ? "student" : "standard"
                           ] >= maxSelectableTickets
@@ -352,9 +354,24 @@ export function TicketTable({
               </tr>
             </tfoot>
           </table>
-          <Button onClick={handleButtonClick} disabled={!isButtonActive}>
-            Go to Identidad
+          <Button onClick={handleButtonClick} disabled={!isButtonActive || isLoading || onRevisarClicked || onIdentidadClicked}>
+            {onIdentidadClicked
+              ? "Cargando..."
+              : reservation.status === reservation_status.reviewing
+                ? "Editar Identidad"
+                : "Continuar a Identidad"}
           </Button>
+          {isButtonActive && reservation.status === reservation_status.reviewing && (
+            <Link href={`/boletas/${showSlug}/${performanceSlug}/revision`}>
+              <Button disabled={isLoading || onRevisarClicked || onIdentidadClicked} onClick={handleRevisarClick}>
+                {onRevisarClicked
+                  ? "Cargando..."
+                  : "Revisar Pedido"
+                }
+              </Button>
+            </Link>
+          )
+          }
         </>
       )}
     </>
