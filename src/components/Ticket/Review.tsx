@@ -1,9 +1,11 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "../shared/Button";
 import { PerformanceFromDB } from "@/types/Event";
+import Link from "next/link";
+import { useState } from "react";
+import { useTopLoader } from 'nextjs-toploader';
+
 
 export function Review({
   showTitle,
@@ -25,7 +27,23 @@ export function Review({
   showSlug: string;
   performanceSlug: string;
 }) {
-  const router = useRouter();
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [onClikedBoletas, setOnClickedBoletas] = useState(false);
+  const [onClickedIdentidad, setOnClickedIdentidad] = useState(false);
+  const [onClickedPago, setOnClickedPago] = useState(false);
+
+  const loader = useTopLoader();
+
+
+  const handleClickedBoletas = () => {
+    setOnClickedBoletas(true);
+    setButtonDisabled(true);
+  }
+
+  const handleClickedIdentidad = () => {
+    setOnClickedIdentidad(true);
+    setButtonDisabled(true);
+  }
 
   return (
     <div style={styles.container}>
@@ -94,11 +112,11 @@ export function Review({
         </p>
         <br />
         <br />
-        <Button
-          onClick={() => router.push(`/boletas/${showSlug}/${performanceSlug}`)}
-        >
-          Editar boletas
-        </Button>
+        <Link href={`/boletas/${showSlug}/${performanceSlug}`}>
+          <Button onClick={handleClickedBoletas} disabled={buttonDisabled}>
+            {onClikedBoletas ? "Cargando..." : "Editar boletas"}
+          </Button>
+        </Link>
       </section>
       <br />
       <br />
@@ -123,23 +141,33 @@ export function Review({
         </p>
         <br />
         <br />
-        <Button
-          onClick={() =>
-            router.push(`/boletas/${showSlug}/${performanceSlug}/identidad`)
-          }
-        >
-          Editar identificación
-        </Button>
+        <Link href={`/boletas/${showSlug}/${performanceSlug}/identidad`}>
+          <Button onClick={handleClickedIdentidad} disabled={buttonDisabled}>
+            {onClickedIdentidad ? "Cargando..." : "Editar identificación"}
+          </Button>
+        </Link>
       </section>
       <br />
       <br />
 
+      {/* <Link
+        href={`/boletas/pago?reserva=${reservation.id}&showSlug=${showSlug}&performanceSlug=${performanceSlug}`}
+      >
+        <Button onClick={handleClickedPago} disabled={buttonDisabled}>
+          {onClickedPago ? "Cargando..." : "Continuar a pago"}
+        </Button>
+      </Link> */}
       <Button
         onClick={() => {
-          window.location.href = `/boletas/pago?reserva=${reservation.id}`;
+          setOnClickedPago(true);
+          setButtonDisabled(true);
+          loader.start();
+
+          window.location.href = `/boletas/pago?reserva=${reservation.id}&showSlug=${showSlug}&performanceSlug=${performanceSlug}`;
         }}
+        disabled={buttonDisabled || onClickedPago}
       >
-        Continuar a Pago
+        {onClickedPago ? "Cargando..." : "Continuar a pago"}
       </Button>
     </div>
   );
