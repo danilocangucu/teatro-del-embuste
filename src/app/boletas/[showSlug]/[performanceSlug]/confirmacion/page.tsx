@@ -72,7 +72,7 @@ export default async function ConfirmacionPage({
   // Get reservation from cookie
   const reqHeaders = await headers();
   console.log("[CONFIRMACION] Request headers obtained");
-  const reservationFromCookie = await getReservationFromCookieViaHeaders(
+  const reservationFromCookie = getReservationFromCookieViaHeaders(
     reqHeaders,
     event.id,
     performance.id

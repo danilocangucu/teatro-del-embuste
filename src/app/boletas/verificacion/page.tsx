@@ -85,7 +85,7 @@ export default async function Home({ searchParams }: Props) {
   const reqHeaders = await headers();
   console.log("[VERIFICACION] Request headers obtained");
 
-  const reservationFromCookie = await getReservationFromCookieViaHeaders(
+  const reservationFromCookie = getReservationFromCookieViaHeaders(
     reqHeaders,
     eventId,
     reservation.performance_id
