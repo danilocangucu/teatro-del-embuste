@@ -2,6 +2,8 @@ import { DiscountRuleDTO, EventDTO, PerformanceDTO, TicketType } from "@/types/E
 import { Stepper } from "../shared/Stepper";
 import { SetReservationCookieClient } from "./SetReservationCookieClient";
 import { TicketTable } from "./TicketTable";
+import { reservation_status } from "@prisma/client";
+import ReservationCountdown from "./ReservationCountdown";
 
 type TicketSelectionPageProps = {
   showTitle: string;
@@ -15,6 +17,7 @@ type TicketSelectionPageProps = {
     timeNow: Date;
     expiresAt: Date;
     items: Array<{ id: string; ticketType: TicketType }>;
+    status: reservation_status | null;
   };
   reservationWasCreatedNow: boolean;
 };
@@ -51,7 +54,13 @@ export async function TicketSelectionPage({
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "1rem" }}>
       {/* Step indicator */}
       <Stepper currentStep="Boletas"/>
-
+      {/* Ticket countdown timer */}
+      {reservation && (
+        <ReservationCountdown
+          expiresAt={reservation.expiresAt}
+          timeNow={reservation.timeNow}
+        />
+      )}
       <header style={{ marginBottom: "2rem" }}>
         <h1>{showTitle}</h1>
         <br />
@@ -91,28 +100,7 @@ export async function TicketSelectionPage({
         </>
       )}
 
-      {/* Ticket countdown timer */}
-      {reservation && (
-        <p style={{ color: "orange", marginBottom: "1rem" }}>
-          Tienes {Math.floor((reservation.expiresAt.getTime() - reservation.timeNow.getTime()) / 1000)} segundos para completar tu compra.
-        </p>
-      )}
-      {/* Ticket countdown expiresAt and timeNow */}
-      {reservation && (
-        <><br /><br />
-          <p style={{ color: "orange", marginBottom: "1rem" }}>
-            Expira el: {reservation.expiresAt.toLocaleString()}
-          </p><br />
-          <p style={{ color: "orange", marginBottom: "1rem" }}>
-            Hora actual: {reservation.timeNow.toLocaleString()}
-          </p>
-          <br /><br />
-        </>
-      )}
-
-
       {/* Ticket status */}
-
       {/* Ticket status errors */}
       {ticketStatus && ticketStatus !== "AGOTADA" && (
         <>
