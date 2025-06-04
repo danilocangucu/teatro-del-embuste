@@ -1,4 +1,3 @@
-// app/pago/page.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -59,7 +58,7 @@ export default function Pago({
         Una vez tu transacción haya sido aprobada, regresarás automáticamente a
         la página del Teatro del Embuste después de un minuto. Si prefieres,
         también puedes volver antes haciendo clic en el botón{" "}
-        <strong>REGRESAR A LA TIENDA</strong>.
+          <strong>VOLVER A LA TIENDA</strong>.
       </p>
       <br />
       <br />
