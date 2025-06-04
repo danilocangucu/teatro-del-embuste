@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
-export const createUser = async (
+export const createGuestUser = async (
   fullName: string,
   email: string,
-  phone: string,
+  phone: string | undefined,
   isGuest: boolean,
   reservationId: string
 ) => {

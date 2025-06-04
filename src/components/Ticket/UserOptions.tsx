@@ -2,15 +2,16 @@
 
 import React, { useState } from "react";
 import { Button } from "../shared/Button";
-import { useRouter } from "next/navigation";
+
+import { GuestForm } from "./Forms/GuestForm";
 
 // TODO UserOptions showSlug and performanceSlug can come from query params
-export function UserOptions({ reservationId, eventId, performanceId, showSlug, performanceSlug }: { reservationId: string, eventId: string, performanceId: string, showSlug: string, performanceSlug: string }) {
+// TODO user type in UserOptions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function UserOptions({ reservationId, eventId, performanceId, showSlug, performanceSlug, user }: { reservationId: string, eventId: string, performanceId: string, showSlug: string, performanceSlug: string, user: any }) {
   const [selected, setSelected] = useState<"login" | "create" | "guest">(
     "guest"
-  );
-  const [isSubmittingGuest, setIsSubmittingGuest] = useState(false);
-  const router = useRouter();
+  );  
   console.log("[UserOptions] setSelected:", setSelected);
 
   return (
@@ -81,134 +82,14 @@ export function UserOptions({ reservationId, eventId, performanceId, showSlug, p
             🕊 Tu información personal solo se usará para esta compra. Después de
             la función, será eliminada automáticamente.
           </p>
-          <form
-            style={{ marginTop: 16 }}
-            onSubmit={async (e) => {
-              e.preventDefault();
-
-              const formData = new FormData(e.currentTarget);
-              const fullName = formData.get("name") as string;
-              const email = formData.get("email") as string;
-              const repeatEmail = formData.get("repeatEmail") as string;
-              const phone = formData.get("phone") as string;
-
-              if (email !== repeatEmail) {
-                alert("Los correos no coinciden.");
-                return;
-              }
-
-              setIsSubmittingGuest(true);
-
-              try {
-                const res = await fetch("/api/users", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fullName,
-                    email,
-                    phone,
-                    isGuest: true,
-                    reservationId: reservationId,
-                  }),
-                });
-
-                const data = await res.json();
-
-                console.log("[UserOptions] Response from user creation:", data);
-
-                if (data.success) {
-                  console.log("Will try to update cookie with body:", {
-                    eventId,
-                    performanceId,
-                    reservationId,
-                    userId: data.userId,
-                  }
-                  )
-                  // Update cookie
-                  const updateRes = await fetch("/api/tickets/reservations", {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      eventId, performanceId,
-                      userId: data.userId,
-                    }),
-                  });
-
-                  if (!updateRes.ok) {
-                    throw new Error("Failed to update reservation cookie");
-                  }
-                  console.log("Cookie updated with user ID:", data.userId);
-                  console.log("Response from cookie update:", await updateRes.json());
-                  console.log("Redirigiendo a la página de pago...");
-                  router.push(`/boletas/${showSlug}/${performanceSlug}/revision`)
-                  // Optionally redirect to payment or next step
-                } else {
-                  alert("Algo salió mal al crear el usuario.");
-                }
-              } catch (err) {
-                console.error(err);
-                alert(`Error en el servidor: ${err}`);
-              } finally {
-                setIsSubmittingGuest(false);
-              }
-            }}
-          >
-            <input
-              type="text"
-              name="name"
-              required
-              placeholder="Nombre completo"
-              style={inputStyle}
-            />
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="Correo electrónico"
-              style={inputStyle}
-            />
-            <input
-              type="email"
-              name="repeatEmail"
-              required
-              placeholder="Repetir correo electrónico"
-              style={inputStyle}
-            />
-            <p
-              style={{
-                marginTop: -8,
-                marginBottom: 12,
-                fontSize: 14,
-                color: "#555",
-              }}
-            >
-              Certifica que tu correo es válido. Las boletas serán enviadas a tu
-              correo.
-            </p>
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Teléfono (opcional)"
-              style={inputStyle}
-            />
-            <p
-              style={{
-                marginTop: -8,
-                marginBottom: 16,
-                fontSize: 14,
-                color: "#555",
-              }}
-            >
-              No tienes que insertar tu número, pero es recomendable. Podremos
-              contactarte con más facilidad, por ejemplo, si la función se
-              cancela o algo.
-            </p>
-            <br />
-            <br />
-            <Button type="submit" disabled={isSubmittingGuest}>
-              {isSubmittingGuest ? "Enviando..." : "Continuar"}
-            </Button>
-          </form>
+          <GuestForm
+            reservationId={reservationId}
+            eventId={eventId}
+            performanceId={performanceId}
+            showSlug={showSlug}
+            performanceSlug={performanceSlug}
+            user={user}
+          />
         </>
       )}
 
