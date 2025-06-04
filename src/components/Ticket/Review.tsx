@@ -5,6 +5,7 @@ import { PerformanceFromDB } from "@/types/Event";
 import Link from "next/link";
 import { useState } from "react";
 import { useTopLoader } from 'nextjs-toploader';
+import { useRouter } from "nextjs-toploader/app";
 
 
 export function Review({
@@ -33,15 +34,11 @@ export function Review({
   const [onClickedPago, setOnClickedPago] = useState(false);
 
   const loader = useTopLoader();
+  const router = useRouter();
 
 
   const handleClickedBoletas = () => {
     setOnClickedBoletas(true);
-    setButtonDisabled(true);
-  }
-
-  const handleClickedIdentidad = () => {
-    setOnClickedIdentidad(true);
     setButtonDisabled(true);
   }
 
@@ -112,7 +109,7 @@ export function Review({
         </p>
         <br />
         <br />
-        <Link href={`/boletas/${showSlug}/${performanceSlug}`}>
+        <Link href={`/boletas/${showSlug}/${performanceSlug}`} prefetch={false}>
           <Button onClick={handleClickedBoletas} disabled={buttonDisabled}>
             {onClikedBoletas ? "Cargando..." : "Editar boletas"}
           </Button>
@@ -141,11 +138,16 @@ export function Review({
         </p>
         <br />
         <br />
-        <Link href={`/boletas/${showSlug}/${performanceSlug}/identidad`}>
-          <Button onClick={handleClickedIdentidad} disabled={buttonDisabled}>
-            {onClickedIdentidad ? "Cargando..." : "Editar identificación"}
-          </Button>
-        </Link>
+        <Button
+          onClick={() => {
+            setOnClickedIdentidad(true);
+            setButtonDisabled(true);
+            router.push(`/boletas/${showSlug}/${performanceSlug}/identidad`);
+          }}
+          disabled={buttonDisabled}
+        >
+          {onClickedIdentidad ? "Cargando..." : "Editar identificación"}
+        </Button>
       </section>
       <br />
       <br />
