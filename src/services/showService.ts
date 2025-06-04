@@ -183,4 +183,15 @@ export const getShowSlugFromShowId = async (showId: string) => {
   return show.slug;
 };
 
-// TODO get showSlug and
+export const getShowTitleByEventId = async (eventId: string) => {
+  const show = await prisma.shows.findFirst({
+    where: { events: { some: { id: eventId } } },
+    select: { title: true },
+  });
+
+  if (!show) {
+    throw new Error("Show not found for the given event ID");
+  }
+
+  return show.title;
+};
