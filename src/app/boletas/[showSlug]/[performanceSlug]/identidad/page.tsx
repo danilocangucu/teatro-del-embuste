@@ -8,10 +8,13 @@ import { headers } from "next/headers";
 import {
   getReservation,
   getReservationItemsByReservationId,
+  updateReservationStatus,
 } from "@/services/ticketService";
 import { UserOptions } from "@/components/Ticket/UserOptions";
 import { Stepper } from "@/components/shared/Stepper";
 import { reservation_status } from "@prisma/client";
+import { getUser } from "@/services/userService";
+import ReservationCountdown from "@/components/Ticket/ReservationCountdown";
 
 // TODO should check if there is an userId in the cookie. if there is, could mean that the user want's to edit their info so load Identidad with user info. activates the "edit" mode and button to save changes should only be active if there are changes made
 
@@ -74,7 +77,7 @@ export default async function IdentidadPage({
   // Get reservation from cookie
   const reqHeaders = await headers();
   console.log("Request headers obtained");
-  const reservationFromCookie = await getReservationFromCookieViaHeaders(
+  const reservationFromCookie = getReservationFromCookieViaHeaders(
     reqHeaders,
     event.id,
     performance.id
@@ -123,6 +126,7 @@ export default async function IdentidadPage({
   //   }
   //   console.log("Expiration dates match");
 
+
   // Check reservation belongs to this performance
   if (reservationFromDB.performance_id !== performance.id) {
     console.warn(
@@ -134,15 +138,35 @@ export default async function IdentidadPage({
   }
   console.log("Reservation matches performance");
 
-  // Check reservation status
-  if (reservationFromDB.status !== reservation_status.reviewing) {
-    console.warn(
-      "Reservation status not 'reviewing':",
-      reservationFromDB.status
-    );
+  if (
+    !(
+      [
+        reservation_status.selecting,
+        reservation_status.identifying,
+        reservation_status.reviewing,
+        reservation_status.paying,
+      ] as readonly reservation_status[]
+    ).includes(reservationFromDB.status)
+  ) {
+    console.warn(`Invalid reservation status: ${reservationFromDB.status}`);
     notFound();
   }
-  console.log("Reservation status is reviewing");
+
+  if (reservationFromDB.status !== reservation_status.identifying) {
+    const updatedReservationStatus = await updateReservationStatus(
+      reservationFromDB.id,
+      reservation_status.identifying
+    );
+
+    console.log(
+      `[IDENTIDAD PAGE] Updated reservation ${reservationFromDB.id} status to 'identifying':`,
+      updatedReservationStatus
+    );
+  } else {
+    console.log(
+      `[IDENTIDAD PAGE] Reservation ${reservationFromDB.id} is already in 'identifying' status`
+    );
+  }
 
   const reservationItems = await getReservationItemsByReservationId(
     reservationFromDB.id
@@ -162,11 +186,20 @@ export default async function IdentidadPage({
   }
   console.log("At least one reservation item has quantity >= 1");
 
-  // All validations passed — reflect current valid state
+  let user;
+  if (reservationFromDB.user_id) {
+    console.log("Fetching user for reservation:", reservationFromDB.user_id);
+    user = await getUser(reservationFromDB.user_id);
+  }
+
   return (
     <>
       <Stepper currentStep="Identidad" />
-      <UserOptions reservationId={reservationFromCookie.reservationId} eventId={event.id} performanceId={performance.id} showSlug={showSlug} performanceSlug={performanceSlug} />
+      <ReservationCountdown
+        expiresAt={reservationFromDB.expires_at}
+        timeNow={now}
+      />
+      <UserOptions reservationId={reservationFromCookie.reservationId} eventId={event.id} performanceId={performance.id} showSlug={showSlug} performanceSlug={performanceSlug} user={user} />
     </>
   );
 }
