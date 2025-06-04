@@ -14,7 +14,7 @@ export const createReservation = async (
     data: {
       performance_id: performanceId,
       status: status,
-      created_at: new Date(),
+      created_at: now,
       expires_at: new Date(now.getTime() + 15 * 60 * 1000),
       user_id: userId,
       total_price: 0,
@@ -23,7 +23,7 @@ export const createReservation = async (
 
   return {
     id: reservation.id,
-    timeNow: now,
+    timeNow: new Date(),
     expiresAt: reservation.expires_at,
   };
 };
@@ -248,4 +248,18 @@ export const updateReservationUserId = async (
   }
 
   return true;
+};
+
+export const getReservationStatus = async (reservationId: string) => {
+  const reservation = await prisma.reservations.findUnique({
+    where: { id: reservationId },
+    select: { status: true },
+  });
+
+  if (!reservation) {
+    console.warn(`No reservation found with ID: ${reservationId}`);
+    return null;
+  }
+
+  return reservation.status;
 };
