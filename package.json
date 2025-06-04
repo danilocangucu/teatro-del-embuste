@@ -16,12 +16,15 @@
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "next": "15.2.4",
+    "nextjs-toploader": "^3.8.16",
     "prisma": "^6.5.0",
     "react": "^19.0.0",
     "react-burger-menu": "^3.1.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.57.0",
     "video.js": "^8.22.0",
-    "videojs-youtube": "^3.0.1"
+    "videojs-youtube": "^3.0.1",
+    "zod": "^3.25.51"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
