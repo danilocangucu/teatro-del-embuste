@@ -17,9 +17,13 @@ import { TicketSelectionPage } from "@/components/Ticket/TicketSelectionPage";
 import {
   createReservation,
   createReservationItem,
+  getReservationStatus,
 } from "@/services/ticketService";
 import { headers } from "next/headers";
-import { getReservationFromCookieViaHeaders, getServersTimeNow } from "@/services/cookieService";
+import {
+  getReservationFromCookieViaHeaders,
+  getServersTimeNow,
+} from "@/services/cookieService";
 import { reservation_status } from "@prisma/client";
 
 // TODO performance page should not create a new reservation if there is no reservation in cookie & available seats of performance === 0
@@ -89,14 +93,15 @@ export default async function PerformancePage({
   }
 
   let reservationId = "";
-let timeNow = new Date();
+  let timeNow = new Date();
   let expiresAt = new Date();
   let reservationItems: { id: string; ticketType: TicketType }[] = [];
   let reservationWasCreatedNow = false;
+  let reservationStatus: reservation_status | null = null;
   if (performanceInEvent) {
     const reqHeaders = await headers();
 
-    const existingReservation = await getReservationFromCookieViaHeaders(
+    const existingReservation = getReservationFromCookieViaHeaders(
       reqHeaders,
       mappedEvent.id,
       performanceInEvent.id
@@ -108,15 +113,25 @@ let timeNow = new Date();
       reservationItems = existingReservation.reservationItems;
       timeNow = getServersTimeNow();
       expiresAt = existingReservation.expiresAt;
+
+      if (timeNow.getTime() >= expiresAt.getTime()) {
+        console.error(
+          "Reservation creation failed: Time now is after expiration time."
+        );
+        return notFound();
+      }
+
+      reservationStatus = await getReservationStatus(reservationId);
     } else {
       const createdReservation = await createReservation(
         performanceInEvent.id,
         reservation_status.selecting,
-        null,
+        null
       );
       reservationId = createdReservation.id;
       timeNow = createdReservation.timeNow;
       expiresAt = createdReservation.expiresAt;
+      reservationStatus = reservation_status.selecting;
 
       reservationItems = await Promise.all(
         mappedEvent.pricings.map((pricing) =>
@@ -146,7 +161,13 @@ let timeNow = new Date();
       discountRule={discountRule}
       discountActive={discountActive}
       ticketStatus={ticketStatus}
-      reservation={{ id: reservationId, items: reservationItems, timeNow, expiresAt }}
+      reservation={{
+        id: reservationId,
+        items: reservationItems,
+        timeNow,
+        expiresAt,
+        status: reservationStatus,
+      }}
       reservationWasCreatedNow={reservationWasCreatedNow}
     />
   );
