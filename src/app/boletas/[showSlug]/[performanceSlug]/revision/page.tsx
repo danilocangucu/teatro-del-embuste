@@ -9,11 +9,13 @@ import {
   getDiscountsByIds,
   getReservation,
   getReservationItemsByReservationId,
+  updateReservationStatus,
 } from "@/services/ticketService";
 import { Stepper } from "@/components/shared/Stepper";
 import { Review } from "@/components/Ticket/Review";
 import { getUser } from "@/services/userService";
 import { $Enums, reservation_status } from "@prisma/client";
+import ReservationCountdown from "@/components/Ticket/ReservationCountdown";
 
 export default async function RevisionPage({
   params,
@@ -74,7 +76,7 @@ export default async function RevisionPage({
 
   const reqHeaders = await headers();
 
-  const reservationFromCookie = await getReservationFromCookieViaHeaders(
+  const reservationFromCookie = getReservationFromCookieViaHeaders(
     reqHeaders,
     event.id,
     performance.id
@@ -143,6 +145,36 @@ export default async function RevisionPage({
     notFound();
   }
 
+  if (
+    !(
+      [
+        reservation_status.selecting,
+        reservation_status.identifying,
+        reservation_status.reviewing,
+        reservation_status.paying,
+      ] as readonly reservation_status[]
+    ).includes(reservationFromDB.status)
+  ) {
+    console.warn(`Invalid reservation status: ${reservationFromDB.status}`);
+    notFound();
+  }
+
+  if (reservationFromDB.status !== reservation_status.reviewing) {
+    const updatedReservationStatus = await updateReservationStatus(
+      reservationFromDB.id,
+      reservation_status.reviewing
+    );
+
+    console.log(
+      `[REVISIÓN PAGE] Updated reservation ${reservationFromDB.id} status to 'reviewing':`,
+      updatedReservationStatus
+    );
+  } else {
+    console.log(
+      `[REVISIÓN PAGE] Reservation ${reservationFromDB.id} is already in 'reviewing' status`
+    );
+  }
+
   // TODO cookie expiration time should be the same as the DB reservation expires_at
   // Check expiration consistency
   //   if (reservationFromCookie.expiresAt !== reservationFromDB.expires_at) {
@@ -165,15 +197,6 @@ export default async function RevisionPage({
     notFound();
   }
   console.log("[Revisión] Reservation matches performance");
-
-  if (reservationFromDB.status !== reservation_status.reviewing) {
-    console.warn(
-      "[Revisión] Reservation status not 'reviewing':",
-      reservationFromDB.status
-    );
-    notFound();
-  }
-  console.log("[Revisión] Reservation status is reviewing");
 
   const reservationItems = await getReservationItemsByReservationId(
     reservationFromDB.id
@@ -242,6 +265,10 @@ export default async function RevisionPage({
   return (
     <>
       <Stepper currentStep="Revisión" />
+      <ReservationCountdown
+        expiresAt={reservationFromDB.expires_at}
+        timeNow={now}
+      />
       <Review
         showTitle={showTitle}
         performance={performance}
