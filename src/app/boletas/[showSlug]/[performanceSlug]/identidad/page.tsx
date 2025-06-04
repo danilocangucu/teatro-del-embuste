@@ -23,6 +23,7 @@ export default async function IdentidadPage({
 }: {
   params: Promise<{ showSlug: string; performanceSlug: string }>;
 }) {
+
   const { showSlug, performanceSlug } = await params;
 
   console.log("Starting IdentidadPage for:", { showSlug, performanceSlug });
@@ -174,21 +175,21 @@ export default async function IdentidadPage({
 
   if (!reservationItems || reservationItems.length === 0) {
     console.warn(
-      "No reservation items found for reservation id:",
+      "[IDENTIDAD PAGE] No reservation items found for reservation id:",
       reservationFromDB.id
     );
     notFound();
   }
 
   if (!reservationItems.some((item) => item.quantity >= 1)) {
-    console.warn("No reservation item has quantity >= 1");
+    console.warn("[IDENTIDAD PAGE] No reservation item has quantity >= 1");
     notFound();
   }
-  console.log("At least one reservation item has quantity >= 1");
+  console.log("[IDENTIDAD PAGE] At least one reservation item has quantity >= 1");
 
   let user;
   if (reservationFromDB.user_id) {
-    console.log("Fetching user for reservation:", reservationFromDB.user_id);
+    console.log("[IDENTIDAD PAGE] Fetching user for reservation:", reservationFromDB.user_id);
     user = await getUser(reservationFromDB.user_id);
   }
 
