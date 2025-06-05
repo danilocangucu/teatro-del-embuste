@@ -104,9 +104,6 @@ export default async function ConfirmacionPage({
     redirect(`/boletas/${showSlug}/${performanceSlug}`);
   }
 
-  
-
-  // No reservation yet → render polling component
   return (
     <>
       <Stepper currentStep="Confirmación" />
