@@ -19,3 +19,7 @@ export const shopSteps = [
   "Verificación",
   "Confirmación",
 ];
+
+// BOLD
+export const boldFixedFee = 900;
+export const boldFeePercentage = 0.0349; // 3.49%
