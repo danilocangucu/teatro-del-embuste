@@ -1,6 +1,6 @@
 import { UserRegistrationSchema } from "@/lib/validators/user";
 import { updateReservationUserId } from "@/services/ticketService";
-import { createGuestUser } from "@/services/userService";
+import { createGuestUser, updateUser } from "@/services/userService";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -65,4 +65,47 @@ export async function POST(req: Request) {
     { success: false, error: "Non-guest registration is not allowed" },
     { status: 501 }
   );
+}
+
+export async function PATCH(req: Request) {
+  const json = await req.json();
+
+  console.log("[/api/users PATCH] Incoming request payload:", json);
+
+  const { userId, fullName, email, phone } = json;
+
+  if (!userId) {
+    console.warn("[/api/users PATCH] Missing userId");
+    return NextResponse.json(
+      { success: false, error: "Missing userId" },
+      { status: 400 }
+    );
+  }
+
+  const updates: Record<string, string | undefined> = {};
+  if (fullName !== undefined) updates.full_name = fullName;
+  if (email !== undefined) updates.email = email;
+  if (phone !== undefined) updates.phone = phone;
+
+  console.log("[/api/users PATCH] Fields to update:", updates);
+
+  if (Object.keys(updates).length === 0) {
+    console.warn("[/api/users PATCH] No changes provided");
+    return NextResponse.json(
+      { success: false, error: "No changes provided" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const isUserUpdated = await updateUser(userId, updates);
+    console.log("[/api/users PATCH] User updated successfully?", isUserUpdated);
+    return NextResponse.json({ success: isUserUpdated });
+  } catch (err) {
+    console.error("[/api/users PATCH] Error updating user:", err);
+    return NextResponse.json(
+      { success: false, error: "Failed to update user" },
+      { status: 500 }
+    );
+  }
 }
