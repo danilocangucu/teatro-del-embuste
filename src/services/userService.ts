@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/prisma";
 
+type UserUpdateInput = {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+};
+
 export const createGuestUser = async (
   fullName: string,
   email: string,
@@ -37,5 +43,23 @@ export const getUser = async (userId: string) => {
   } catch (error) {
     console.error("[getUser] Error fetching user:", error);
     throw new Error("[getUser] Failed to fetch user");
+  }
+};
+
+export const updateUser = async (userId: string, updates: UserUpdateInput) => {
+  try {
+    if (Object.keys(updates).length === 0) {
+      throw new Error("[updateUser] No fields provided for update");
+    }
+
+    const updatedUser = await prisma.users.update({
+      where: { id: userId },
+      data: updates,
+    });
+
+    return updatedUser ? true : false;
+  } catch (error) {
+    console.error("[updateUser] Error updating user:", error);
+    throw new Error("[updateUser] Failed to update user");
   }
 };
