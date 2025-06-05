@@ -219,11 +219,15 @@ export default async function RevisionPage({
   const validReservationItems = reservationItems.filter(
     (item) => item.quantity >= 1
   );
+  let itemsToDisplay;
 
   const discountedItems = validReservationItems.filter(
     (item) => item.discount_id !== null
   );
+
+  if (discountedItems.length > 0) {
   const discountTicketMap = new Map<string, Set<$Enums.ticket_type>>();
+
   for (const item of discountedItems) {
     if (item.discount_id) {
       if (!discountTicketMap.has(item.discount_id)) {
@@ -234,7 +238,6 @@ export default async function RevisionPage({
   }
 
   const discountIdsToFetch = [...discountTicketMap.keys()];
-
   const discounts = await getDiscountsByIds(discountIdsToFetch);
 
   if (!discounts || discounts.length === 0) {
@@ -262,6 +265,12 @@ export default async function RevisionPage({
     };
   });
 
+    itemsToDisplay = enrichedReservationItems;
+  } else {
+    itemsToDisplay = validReservationItems;
+  }
+
+
   return (
     <>
       <Stepper currentStep="Revisión" />
@@ -273,7 +282,7 @@ export default async function RevisionPage({
         showTitle={showTitle}
         performance={performance}
         reservation={reservationFromDB}
-        reservationItems={enrichedReservationItems}
+        reservationItems={itemsToDisplay}
         user={user}
         showSlug={showSlug}
         performanceSlug={performanceSlug}
