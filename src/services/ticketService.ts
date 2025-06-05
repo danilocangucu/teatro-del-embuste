@@ -18,6 +18,8 @@ export const createReservation = async (
       expires_at: new Date(now.getTime() + 15 * 60 * 1000),
       user_id: userId,
       total_price: 0,
+      ticket_total_price: 0,
+      bold_fee: 0,
     },
   });
 
@@ -166,7 +168,9 @@ export const getDiscountsByIds = async (discountIds: string[]) => {
 export const updateReservationAndItemsTotalPrices = async (
   reservationId: string,
   items: { id: string; total_price: number }[],
-  reservationTotalPrice: number
+  ticketTotalPrice: number,
+  boldFee: number,
+  totalPrice: number
 ) => {
   return prisma.$transaction(async (tx) => {
     const updatedItems = await Promise.all(
@@ -180,7 +184,11 @@ export const updateReservationAndItemsTotalPrices = async (
 
     const updatedReservation = await tx.reservations.update({
       where: { id: reservationId },
-      data: { total_price: reservationTotalPrice },
+      data: {
+        total_price: totalPrice,
+        ticket_total_price: ticketTotalPrice,
+        bold_fee: boldFee,
+      },
     });
 
     return { updatedItems, updatedReservation };
