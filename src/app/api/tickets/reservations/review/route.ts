@@ -6,6 +6,7 @@ import {
   updateReservationStatus,
 } from "@/services/ticketService";
 import { DiscountDTO } from "@/types/Event";
+import { boldFeePercentage, boldFixedFee } from "@/utils/constants";
 import { getDiscountedPrice } from "@/utils/sharedUtils";
 import { reservation_status, ticket_type } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -156,14 +157,22 @@ export async function PUT(req: Request) {
     itemsToUpdate.push({ id: studentItem.id, total_price: studentTotalPrice });
   }
 
-  const reservationTotal = standardTotalPrice + studentTotalPrice;
+  const ticketTotalPrice = standardTotalPrice + studentTotalPrice;
 
-  // Perform both updates in a single transaction
+  // Bold fee is 3.49% of ticket price + 900 COP flat fee
+  const boldFee =
+    Math.round(ticketTotalPrice * boldFeePercentage) + boldFixedFee;
+
+  const totalPrice = ticketTotalPrice + boldFee;
+
+  // Perform all updates in a single transaction
   const { updatedItems, updatedReservation } =
     await updateReservationAndItemsTotalPrices(
       reservationId,
       itemsToUpdate,
-      reservationTotal
+      ticketTotalPrice,
+      boldFee,
+      totalPrice
     );
 
   console.log("Updated reservation items:", updatedItems);
