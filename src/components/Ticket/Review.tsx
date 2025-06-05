@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTopLoader } from 'nextjs-toploader';
 import { useRouter } from "nextjs-toploader/app";
-
+import { ticket_type } from "@prisma/client";
 
 export function Review({
   showTitle,
@@ -36,7 +36,6 @@ export function Review({
   const loader = useTopLoader();
   const router = useRouter();
 
-
   const handleClickedBoletas = () => {
     setOnClickedBoletas(true);
     setButtonDisabled(true);
@@ -65,45 +64,57 @@ export function Review({
         <br />
         <br />
         <div style={styles.itemList}>
-          {reservationItems.map((item, idx) => (
-            <div key={item.id ?? idx} style={styles.itemBox}>
-              <p>
-                <strong>Tipo:</strong> {item.ticket_type}
-              </p>
-              <br />
-              <p>
-                <strong>Cantidad:</strong> {item.quantity}
-              </p>
-              <br />
-              <p>
-                <strong>Precio unitario:</strong> $
-                {item.unit_price.toLocaleString("es-CO")}
-              </p>
-              <br />
-              {item.discount ? (
-                <>
+          {reservationItems.map((item, idx) => {
+            const isSingle = item.quantity === 1;
+
+            return (
+              <div key={item.id ?? idx} style={styles.itemBox}>
+                <p>
+                  <strong>Tipo:</strong> {item.ticket_type === ticket_type.standard ? "General" : "Estudiante"}
+                </p>
+                <br />
+                <p>
+                  <strong>Cantidad:</strong> {item.quantity}
+                </p>
+                <br />
+                {isSingle ? (
                   <p>
-                    <strong>Descuento:</strong> {item.discount.description} (
-                    {item.discount.type === "flat" ? "-" : "%"}
-                    {item.discount.value})
+                    <strong>Precio:</strong> ${item.total_price.toLocaleString("es-CO")}
                   </p>
-                  <br />
-                </>
-              ) : (
-                <>
-                  <p>Sin descuento</p>
-                  <br />
-                </>
-              )}
-              <p>
-                <strong>Total:</strong> $
-                {item.total_price.toLocaleString("es-CO")}
-              </p>
-              <br />
-              <br />
-            </div>
-          ))}
+                ) : (
+                  <>
+                    <p>
+                      <strong>Precio unitario:</strong> ${item.unit_price.toLocaleString("es-CO")}
+                    </p>
+                    <br />
+                      {item.discount && (
+                        <>
+                          <p>
+                            <strong>Descuento:</strong> {item.discount.description} (
+                            {item.discount.type === "flat" ? "-" : "%"}
+                            {item.discount.value})
+                          </p>
+                          <br />
+                        </>
+                      )}
+                      <p>
+                        <strong>Total:</strong> ${item.total_price.toLocaleString("es-CO")}
+                      </p>
+                  </>
+                )}
+                <br />
+                <br />
+              </div>
+            );
+          })}
         </div>
+        <p>
+          Subtotal total de boleta(s): ${reservation.ticket_total_price.toLocaleString("es-CO")}
+        </p>
+        <br />
+        <p>
+          Servicio: ${reservation.bold_fee.toLocaleString("es-CO")}
+        </p><br />
         <p style={styles.totalPrice}>
           Total a pagar: ${reservation.total_price.toLocaleString("es-CO")}
         </p>
@@ -152,13 +163,6 @@ export function Review({
       <br />
       <br />
 
-      {/* <Link
-        href={`/boletas/pago?reserva=${reservation.id}&showSlug=${showSlug}&performanceSlug=${performanceSlug}`}
-      >
-        <Button onClick={handleClickedPago} disabled={buttonDisabled}>
-          {onClickedPago ? "Cargando..." : "Continuar a pago"}
-        </Button>
-      </Link> */}
       <Button
         onClick={() => {
           setOnClickedPago(true);
