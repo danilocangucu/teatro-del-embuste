@@ -98,6 +98,7 @@ export default function ReservationCountdown({ expiresAt, timeNow }: Props) {
             Volver a la obra
           </button>
            { /* TODO remove cookie before pushing */ }
+          {/* TODO router.push no funciona si el usuario ya está en /boletas/${effectiveShowSlug}/${effectivePerformanceSlug} */}
           <button
             onClick={() =>
               router.push(`/boletas/${effectiveShowSlug}/${effectivePerformanceSlug}`)
