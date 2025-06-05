@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { getReservation, updateReservationStatusAndPaymentId } from "@/services/ticketService";
 import { reservation_status } from "@prisma/client";
-import { sendConfirmationOrder } from "@/services/emailService";
+import { sendTicketEmail } from "@/services/emailService";
 import { getPerformanceByReservationId } from "@/services/performanceService";
 import { getISODate, getISOTime } from "@/utils/eventUtils";
 import { getShowTitleByEventId } from "@/services/showService";
@@ -261,12 +261,25 @@ async function processWebhook(req: Request) {
 
     console.log("[Webhook] 📧 Sending confirmation email...");
 
-    await sendConfirmationOrder({
-      email: user.email,
+    // TODO create tickets in the db according to the reservation
+    const ticketId = "1234abcd";
+
+    const sentTicketEmail = await sendTicketEmail({
+      email: user.email, // replace with real address for production
       fullName: user.full_name,
       showTitle,
+      ticketType: "Boleta: General / Estudiante",
       performanceDate: getISODate(performance.date),
       performanceTime: getISOTime(performance.time!),
+      qrText: `https://teatrodelembuste.com/boletas/qr?id=${ticketId}`,
     });
+
+    if (!sentTicketEmail.success) {
+      console.error("[Webhook] ❌ Failed to send ticket email", {
+        error: sentTicketEmail.error,
+      });
+      throw new Error("[Webhook] Failed to send ticket email");
+    }
+    console.log("[Webhook] ✅ Ticket email sent successfully");
   }
 }
