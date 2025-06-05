@@ -9,6 +9,7 @@ import { useTopLoader } from "nextjs-toploader";
 
 import { Button } from "../shared/Button";
 import { reservation_status } from "@prisma/client";
+import { boldFeePercentage, boldFixedFee } from "@/utils/constants";
 
 type TicketType = "standard" | "student" | "senior";
 
@@ -189,16 +190,19 @@ export function TicketTable({
     10
   );
 
-  const totalPrice = pricing.reduce((acc, { type, price }) => {
+  const ticketTotalPrice = pricing.reduce((acc, { type, price }) => {
     const quantity = quantities[type] || 0;
     const isEligible =
       discountActive && discountRule?.criteria.ticketTypes?.includes(type);
-    // TODO check if discountRule is always available
     const unitPrice = isEligible
       ? getDiscountedPrice(price, discountRule!.discount)
       : price;
     return acc + unitPrice * quantity;
   }, 0);
+
+  const boldFee = Math.round(ticketTotalPrice * boldFeePercentage) + boldFixedFee;
+  const totalPrice = ticketTotalPrice + boldFee;
+  const noTicketsWereSelected = boldFee === boldFixedFee
 
   const handleQuantityChange = async (
     type: TicketType,
@@ -267,6 +271,17 @@ export function TicketTable({
 
   const isButtonActive = reservationItems.some((item) => item.quantity > 0);
 
+  const showDiscountColumn =
+    discountActive &&
+    discountRule?.criteria.ticketTypes?.some((type) =>
+      pricing.some((p) => p.type === type)
+    );
+
+  const tableHasFiveColumns = false;
+  const colCount = tableHasFiveColumns ? 5 : 4;
+  const labelColSpan = Math.floor(colCount / 3); // 2 or 2
+  const valueColSpan = colCount - labelColSpan;  // 2 or 3
+
   return (
     <>
       {!isLoading &&
@@ -298,7 +313,7 @@ export function TicketTable({
               <tr>
                 <th>Boleta</th>
                 <th>Precio</th>
-                <th>Descuento</th>
+                {showDiscountColumn && <th>Descuento</th>}
                 <th>Cantidad</th>
                 <th>Total</th>
               </tr>
@@ -319,9 +334,11 @@ export function TicketTable({
                   <tr key={type}>
                     <td>{type === "standard" ? "General" : "Estudiante"}</td>
                     <td>{formatCOP(price)}</td>
+                    {showDiscountColumn && (
                     <td>
                       {isEligible ? `-${formatCOP(discountAmount)}` : "-"}
                     </td>
+                    )}
                     <td>
                       <select
                         disabled={
@@ -357,17 +374,38 @@ export function TicketTable({
               })}
             </tbody>
             <tfoot>
+              <tr style={{ borderBottom: "2px solid #000" }}>
+                <td></td>
+              </tr>
               <tr>
-                <td
-                  colSpan={3}
-                  style={{ textAlign: "right", fontWeight: "bold" }}
-                >
-                  Total entradas:
+                <td colSpan={valueColSpan} style={{ textAlign: "right", fontWeight: "bold" }}>
+                  Boletas:
                 </td>
-                <td style={{ fontWeight: "bold" }}>
+                <td colSpan={valueColSpan} style={{ fontWeight: "bold" }}>
                   {quantities.standard + quantities.student}
                 </td>
-                <td style={{ fontWeight: "bold" }}>{formatCOP(totalPrice)}</td>
+              </tr>
+              <tr>
+                <td colSpan={valueColSpan} style={{ textAlign: "right" }}>
+                  Subtotal:
+                </td>
+                <td colSpan={valueColSpan}>{formatCOP(ticketTotalPrice)}</td>
+              </tr>
+              <tr>
+                <td colSpan={valueColSpan} style={{ textAlign: "right" }}>
+                  Servicio:
+                </td>
+                <td colSpan={valueColSpan}>
+                  {noTicketsWereSelected ? "$ 0" : formatCOP(boldFee)}
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={valueColSpan} style={{ textAlign: "right", fontWeight: "bold", paddingTop: "1rem" }}>
+                  Total a pagar:
+                </td>
+                <td colSpan={valueColSpan} style={{ fontWeight: "bold", paddingTop: "1rem" }}>
+                  {noTicketsWereSelected ? "$ 0" : formatCOP(totalPrice)}
+                </td>
               </tr>
             </tfoot>
           </table>
