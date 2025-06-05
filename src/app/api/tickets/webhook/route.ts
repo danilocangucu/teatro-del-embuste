@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { getReservation, updateReservationStatusAndPaymentId } from "@/services/ticketService";
 import { reservation_status } from "@prisma/client";
+import { sendConfirmationOrder } from "@/services/emailService";
+import { getPerformanceByReservationId } from "@/services/performanceService";
+import { getISODate, getISOTime } from "@/utils/eventUtils";
+import { getShowTitleByEventId } from "@/services/showService";
+import { getUser } from "@/services/userService";
 
 // const BOLD_SECRET_KEY = process.env.BOLD_PRUEBA_LLAVE_SECRETA!;
 const BOLD_MERCHANT_ID = process.env.BOLD_MERCHANT_ID!;
@@ -214,4 +219,54 @@ async function processWebhook(req: Request) {
     event.boltPaymentId
   );
   console.log("[Webhook] ✅ Reservation updated:", updatedReservation);
+
+  if (reservationStatus === reservation_status.confirmed) {
+    console.log(`[Webhook] ✅ Reservation ${event.reservationId} confirmed`);
+    console.log("[Webhook] 📧 Preparing confirmation email...");
+
+    const performance = await getPerformanceByReservationId(
+      event.reservationId
+    );
+
+    if (!performance) {
+      console.error("[Webhook] ❌ Performance not found for reservation", {
+        reservationId: event.reservationId,
+      });
+    }
+
+    const showTitle = await getShowTitleByEventId(performance.event_id);
+
+    if (!showTitle) {
+      console.error("[Webhook] ❌ Show title not found for event", {
+        eventId: performance.event_id,
+      });
+      throw new Error("[Webhook] Show title not found for confirmation email");
+    }
+
+    if (!reservation.user_id) {
+      console.error("[Webhook] ❌ User ID not found in reservation", {
+        reservationId: event.reservationId,
+      });
+      throw new Error("[Webhook] User ID not found for confirmation email");
+    }
+
+    const user = await getUser(reservation.user_id);
+
+    if (!user) {
+      console.error("[Webhook] ❌ User not found for reservation", {
+        userId: reservation.user_id,
+      });
+      throw new Error("[Webhook] User not found for confirmation email");
+    }
+
+    console.log("[Webhook] 📧 Sending confirmation email...");
+
+    await sendConfirmationOrder({
+      email: user.email,
+      fullName: user.full_name,
+      showTitle,
+      performanceDate: getISODate(performance.date),
+      performanceTime: getISOTime(performance.time!),
+    });
+  }
 }
