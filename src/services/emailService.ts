@@ -2,12 +2,23 @@
 
 import { SendMailClient } from "zeptomail";
 import { zeptoMailFrom, zeptoMailToken, zeptoMailUrl } from "@/utils/constants";
+import QRCode from "qrcode";
+import { generateTicketPDF } from "@/lib/pdf/generateTicketPDF";
+import util from "util";
+
+type Attachment = {
+  content: string; // base64 encoded
+  name: string;
+  mime_type: string;
+  contentTransferEncoding?: string;
+};
 
 type SendZeptomailParams = {
   to: Array<{ address: string; name: string }>;
   subject: string;
   text: string;
   html?: string;
+  attachments?: Attachment[];
 };
 
 export const sendZeptomail = async ({
@@ -15,7 +26,12 @@ export const sendZeptomail = async ({
   subject,
   text,
   html,
-}: SendZeptomailParams) => {
+  attachments,
+}: SendZeptomailParams): Promise<{
+  success: boolean;
+  message?: string;
+  error?: unknown;
+}> => {
   if (!zeptoMailUrl) throw new Error("ZEPTOMAIL_URL is not defined");
   if (!zeptoMailToken) throw new Error("ZEPTOMAIL_TOKEN is not defined");
   if (!zeptoMailFrom) throw new Error("ZEPTOMAIL_FROM is not defined");
@@ -37,63 +53,142 @@ export const sendZeptomail = async ({
       subject,
       textbody: text,
       ...(html ? { htmlbody: html } : {}),
+      ...(attachments ? { attachments } : {}),
     });
 
     console.log("Email sent via ZeptoMail", {
       to: to.map((r) => r.address),
       subject,
     });
+
+    return { success: true, message: "Email sent successfully" };
   } catch (error) {
-    console.log("Failed to send email via ZeptoMail", error);
+    console.error("❌ Failed to send email via sendZeptomail");
+
+    if (error && typeof error === "object") {
+      console.error(
+        "Full error object:\n",
+        util.inspect(error, { depth: null, colors: true, compact: false })
+      );
+
+      if ("error" in error && typeof error.error === "object") {
+        console.error(
+          "Nested 'error' property:\n",
+          util.inspect(error.error, {
+            depth: null,
+            colors: true,
+            compact: false,
+          })
+        );
+
+        if (
+          error.error &&
+          typeof error.error === "object" &&
+          "details" in error.error
+        ) {
+          console.error(
+            "Error details:\n",
+            util.inspect((error.error as { details?: unknown }).details, {
+              depth: null,
+              colors: true,
+              compact: false,
+            })
+          );
+        }
+      }
+
+      if ("response" in error && typeof error.response === "object") {
+        console.error(
+          "Response object:\n",
+          util.inspect(error.response, {
+            depth: null,
+            colors: true,
+            compact: false,
+          })
+        );
+      }
+    } else {
+      console.error(error);
+    }
+
+    return { success: false, message: "Failed to send email", error };
   }
 };
 
-export const sendConfirmationOrder = async (data: {
+export const sendTicketEmail = async (data: {
   email: string;
   fullName: string;
   showTitle: string;
+  ticketType: string;
   performanceDate: string;
   performanceTime: string;
-}) => {
-  const subject = `Confirmación de tu compra – ${data.showTitle}`;
-  const text = `Hola ${data.fullName},
+  qrText: string;
+}): Promise<{ success: boolean; message?: string; error?: unknown }> => {
+  try {
+    // Generate QR Code as Data URL
+    const qrDataUrl = await QRCode.toDataURL(data.qrText, { scale: 10 });
 
-Gracias por tu compra en Teatro del Embuste.
+    // Generate PDF buffer with QR code and ticket info
+    const pdfBuffer = await generateTicketPDF(qrDataUrl, {
+      name: data.fullName,
+      show: data.showTitle,
+      type: data.ticketType,
+      date: data.performanceDate,
+      time: data.performanceTime,
+    });
 
-Obra: ${data.showTitle}
+    // Convert PDF buffer to base64 string for attachment
+    const base64Pdf = Buffer.from(pdfBuffer).toString("base64");
+
+    const subject = `Tus entradas para ${data.showTitle}`;
+    const text = `Hola ${data.fullName},
+
+Adjuntamos tus entradas para la obra "${data.showTitle}".
+
 Fecha: ${data.performanceDate}
 Hora: ${data.performanceTime}
-
-Este correo confirma que hemos recibido tu pedido. Pronto recibirás más detalles o tu(s) entrada(s), si aplica.
 
 ¡Nos vemos en el teatro!
 
 — Teatro del Embuste`;
 
-  const html = `
-    <p>Hola ${data.fullName},</p>
-    <p>Gracias por tu compra en <strong>Teatro del Embuste</strong>.</p>
-    <p>
-      <strong>Obra:</strong> ${data.showTitle}<br />
-      <strong>Fecha:</strong> ${data.performanceDate}<br />
-      <strong>Hora:</strong> ${data.performanceTime}
-    </p>
-    <p>Este correo confirma que hemos recibido tu pedido. Pronto recibirás más detalles o tu(s) entrada(s), si aplica.</p>
-    <p>¡Nos vemos en el teatro!</p>
-    <p>— Teatro del Embuste</p>
-  `;
+    const html = `
+      <p>Hola ${data.fullName},</p>
+      <p>Adjuntamos tus entradas para la obra <strong>${data.showTitle}</strong>.</p>
+      <p>
+        <strong>Fecha:</strong> ${data.performanceDate}<br/>
+        <strong>Hora:</strong> ${data.performanceTime}
+      </p>
+      <p>¡Nos vemos en el teatro!</p>
+      <p>— Teatro del Embuste</p>
+    `;
 
-  await sendZeptomail({
-    to: [
-      {
-        address: data.email,
-        name: data.fullName,
-      },
-    ],
-    subject,
-    text,
-    html,
-  });
+    const emailPayload = {
+      to: [
+        {
+          address: data.email,
+          name: data.fullName,
+        },
+      ],
+      subject,
+      text,
+      html,
+      attachments: [
+        {
+          content: base64Pdf,
+          name: "entrada.pdf",
+          mime_type: "application/pdf",
+          contentTransferEncoding: "base64",
+        },
+      ],
+    };
+
+    // Send email with attachments
+    const result = await sendZeptomail(emailPayload);
+
+    return result; // { success, message?, error? }
+  } catch (error) {
+    console.error("❌ sendTicketEmail failed:", error);
+    return { success: false, message: "Failed to send ticket email", error };
+  }
 };
-
-
