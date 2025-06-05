@@ -256,6 +256,8 @@ model reservations {
   user_id           String?             @db.Uuid
   total_price       Int
   bold_payment_id   String?             @db.VarChar(64)
+  ticket_total_price Int
+  bold_fee          Int
   reservation_items reservation_items[]
   performances      performances        @relation(fields: [performance_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reservations_performance_id_fkey1")
   users             users[]
