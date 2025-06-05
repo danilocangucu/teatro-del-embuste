@@ -34,6 +34,7 @@ const Discounts: React.FC<DiscountsProps> = ({
 
         return (
           <div key={index}>
+            {/* TODO PREVENTA should check if current date is not untilDate */}
             <h3 className="fontSecondaryMedium">PREVENTA</h3>
             {hasDeadline && <p>HASTA {untilDate}</p>}
             <ul>
