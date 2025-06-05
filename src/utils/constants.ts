@@ -23,3 +23,11 @@ export const shopSteps = [
 // BOLD
 export const boldFixedFee = 900;
 export const boldFeePercentage = 0.0349; // 3.49%
+
+// EMAIL
+export const zeptoMailUrl = process.env.ZEPTOMAIL_URL;
+export const zeptoMailToken = process.env.ZEPTOMAIL_TOKEN;
+export const zeptoMailFrom = {
+  address: "notificaciones@teatrodelembuste.com",
+  name: "Teatro del Embuste",
+};
