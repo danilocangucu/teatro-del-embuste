@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../../shared/Button";
 import Link from "next/link";
-import { useRouter } from 'nextjs-toploader/app';
-import { useTopLoader } from 'nextjs-toploader';
-
+import { useRouter } from "nextjs-toploader/app";
+import { useTopLoader } from "nextjs-toploader";
+import { patchUser } from "@/utils/userUtils";
 
 interface GuestFormProps {
   reservationId: string;
@@ -15,9 +15,10 @@ interface GuestFormProps {
   showSlug: string;
   performanceSlug: string;
   user?: {
-    full_name?: string;
-    email?: string;
-    phone?: string;
+    id: string;
+    full_name: string;
+    email: string;
+    phone: string;
   };
 }
 
@@ -39,6 +40,8 @@ export function GuestForm({
     register,
     handleSubmit,
     watch,
+    trigger,
+    getValues,
     formState: { errors, isValid },
   } = useForm({
     mode: "onChange",
@@ -51,6 +54,13 @@ export function GuestForm({
   });
 
   const guestEmail = watch("email");
+  const guestRepeatEmail = watch("repeatEmail");
+
+  useEffect(() => {
+    if (!guestEmail) return;
+    if (!guestRepeatEmail) return;
+    trigger("repeatEmail");
+  }, [guestEmail, guestRepeatEmail, trigger]);
 
   const onSubmitGuest = async (data: {
     fullName: string;
@@ -59,6 +69,7 @@ export function GuestForm({
     phone?: string;
   }) => {
     loader.start();
+
     if (data.email !== data.repeatEmail) {
       alert("Los correos no coinciden.");
       return;
@@ -66,50 +77,86 @@ export function GuestForm({
 
     setIsSubmittingGuest(true);
     try {
-      const res = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: data.fullName,
-          email: data.email,
-          phone: data.phone,
-          isGuest: true,
-          reservationId: reservationId,
-        }),
-      });
+      if (user) {
+        const patchResult = await patchUser(
+          user.id,
+          { full_name: user.full_name, email: user.email, phone: user.phone },
+          { fullName: data.fullName, email: data.email, phone: data.phone }
+        );
+        console.log("[GuestForm] Patch result:", patchResult);
 
-      const json = await res.json();
-      if (json.success) {
-        const updateRes = await fetch("/api/tickets/reservations", {
-          method: "PUT",
+        if (!patchResult.success) {
+          alert("No se pudo actualizar el usuario.");
+          setIsSubmittingGuest(false);
+          return;
+        }
+
+        router.push(`/boletas/${showSlug}/${performanceSlug}/revision`);
+        return;
+      } else {
+        const res = await fetch("/api/users", {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            eventId,
-            performanceId,
-            userId: json.userId,
+            fullName: data.fullName,
+            email: data.email,
+            phone: data.phone,
+            isGuest: true,
+            reservationId: reservationId,
           }),
         });
 
-        if (!updateRes.ok)
-          throw new Error("Failed to update reservation cookie");
-        router.push(`/boletas/${showSlug}/${performanceSlug}/revision`);
-        console.log("..............................");
-        console.log("Returning...");
-        console.log("..............................");
-      } else {
-        alert("Algo salió mal al crear el usuario.");
-        setIsSubmittingGuest(false);
+        const json = await res.json();
+        if (json.success) {
+          const updateRes = await fetch("/api/tickets/reservations", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              eventId,
+              performanceId,
+              userId: json.userId,
+            }),
+          });
+
+          if (!updateRes.ok) {
+            throw new Error("Failed to update reservation cookie");
+          }
+
+          router.push(`/boletas/${showSlug}/${performanceSlug}/revision`);
+          return;
+        } else {
+          alert("Algo salió mal al crear el usuario.");
+          setIsSubmittingGuest(false);
+        }
       }
     } catch (err) {
       console.error(err);
       alert(`Error en el servidor: ${err}`);
-            setIsSubmittingGuest(false);
+      setIsSubmittingGuest(false);
     }
   };
 
-  const onGoBack = () => {
+  const onGoBack = async () => {
+    const data = getValues();
     setIsGoingBack(true);
-  }
+    if (user) {
+      const patchResult = await patchUser(
+        user.id,
+        { full_name: user.full_name, email: user.email, phone: user.phone },
+        { fullName: data.fullName, email: data.email, phone: data.phone }
+      );
+
+      if (!patchResult.success) {
+        alert("No se pudo actualizar el usuario.");
+        setIsGoingBack(false);
+        return;
+      }
+
+      console.log("[GuestForm] Patch result:", patchResult);
+      router.push(`/boletas/${showSlug}/${performanceSlug}/revision`);
+      return;
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmitGuest)} style={{ marginTop: 16 }}>
@@ -187,10 +234,13 @@ export function GuestForm({
 
       <Link href={`/boletas/${showSlug}/${performanceSlug}`}>
         <Button onClick={onGoBack} disabled={isSubmittingGuest || isGoingBack}>
-          { isGoingBack ? "Cargando..." : "Volver a boletas"}
+          {isGoingBack ? "Cargando..." : "Volver a boletas"}
         </Button>
       </Link>
-      <Button type="submit" disabled={!isValid || isSubmittingGuest || isGoingBack}>
+      <Button
+        type="submit"
+        disabled={!isValid || isSubmittingGuest || isGoingBack}
+      >
         {isSubmittingGuest ? "Cargando..." : "Revisar Pedido"}
       </Button>
     </form>
