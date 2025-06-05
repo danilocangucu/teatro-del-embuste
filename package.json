@@ -24,6 +24,7 @@
     "react-hook-form": "^7.57.0",
     "video.js": "^8.22.0",
     "videojs-youtube": "^3.0.1",
+    "zeptomail": "^6.2.1",
     "zod": "^3.25.51"
   },
   "devDependencies": {
