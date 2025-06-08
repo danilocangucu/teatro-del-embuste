@@ -115,30 +115,41 @@ export const sendZeptomail = async ({
   }
 };
 
-export const sendTicketEmail = async (data: {
+export const sendTicketsEmail = async (data: {
   email: string;
   fullName: string;
   showTitle: string;
-  ticketType: string;
   performanceDate: string;
   performanceTime: string;
-  qrText: string;
+  ticketIdsAndTypes: {
+    id: string;
+    type: string;
+  }[];
 }): Promise<{ success: boolean; message?: string; error?: unknown }> => {
   try {
-    // Generate QR Code as Data URL
-    const qrDataUrl = await QRCode.toDataURL(data.qrText, { scale: 10 });
+    const attachments = await Promise.all(
+      data.ticketIdsAndTypes.map(async (ticketIdAndType, index) => {
+        const qrText = `https://teatrodelembuste.com/boletas/qr?id=${ticketIdAndType.id}&type=${ticketIdAndType.type}`;
+        const qrDataUrl = await QRCode.toDataURL(qrText, { scale: 10 });
 
-    // Generate PDF buffer with QR code and ticket info
-    const pdfBuffer = await generateTicketPDF(qrDataUrl, {
-      name: data.fullName,
-      show: data.showTitle,
-      type: data.ticketType,
-      date: data.performanceDate,
-      time: data.performanceTime,
-    });
+        const pdfBuffer = await generateTicketPDF(qrDataUrl, {
+          name: data.fullName,
+          show: data.showTitle,
+          type: ticketIdAndType.type,
+          date: data.performanceDate,
+          time: data.performanceTime,
+        });
 
-    // Convert PDF buffer to base64 string for attachment
-    const base64Pdf = Buffer.from(pdfBuffer).toString("base64");
+        const base64Pdf = Buffer.from(pdfBuffer).toString("base64");
+
+        return {
+          content: base64Pdf,
+          name: `boleta-${index + 1}-${data.showTitle}.pdf`,
+          mime_type: "application/pdf",
+          contentTransferEncoding: "base64",
+        };
+      })
+    );
 
     const subject = `Tus entradas para ${data.showTitle}`;
     const text = `Hola ${data.fullName},
@@ -173,22 +184,15 @@ Hora: ${data.performanceTime}
       subject,
       text,
       html,
-      attachments: [
-        {
-          content: base64Pdf,
-          name: "entrada.pdf",
-          mime_type: "application/pdf",
-          contentTransferEncoding: "base64",
-        },
-      ],
+      attachments,
     };
 
-    // Send email with attachments
     const result = await sendZeptomail(emailPayload);
 
-    return result; // { success, message?, error? }
+    return result;
   } catch (error) {
-    console.error("❌ sendTicketEmail failed:", error);
-    return { success: false, message: "Failed to send ticket email", error };
+    console.error("❌ sendTicketsEmail failed:", error);
+    return { success: false, message: "Failed to send tickets email", error };
   }
 };
+
