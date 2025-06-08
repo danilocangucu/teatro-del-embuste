@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 
 export async function generateTicketPDF(
   qrDataUrl: string,
@@ -10,55 +10,54 @@ export async function generateTicketPDF(
     time: string;
   }
 ) {
-  const html = `
-    <html>
-      <head>
-        <style>
-          body {
-            font-family: sans-serif;
-            padding: 2rem;
-          }
-          .ticket {
-            border: 1px solid #ccc;
-            padding: 1rem;
-            width: 300px;
-            text-align: center;
-          }
-          img {
-            margin-top: 1rem;
-            width: 200px;
-            height: 200px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="ticket">
-        <h1>Boletas</h1>
-          <h2>${ticketInfo.show}</h2>
-          <p><strong>Teatro del Embuste</strong></p>
-          <p><strong>Nombre:</strong> ${ticketInfo.name}</p>
-          <p><strong>${ticketInfo.type}</strong></p>
-          <p><strong>Fecha:</strong> ${ticketInfo.date}</p>
-            <p><strong>Hora:</strong> ${ticketInfo.time}</p>
-            <br />
-            <p>Presenta este código QR en la entrada</p>
-          <img src="${qrDataUrl}" alt="Código QR" />
-        </div>
-      </body>
-    </html>
-  `;
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([400, 600]);
 
-  const browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const { height } = page.getSize();
+
+  page.drawText("Boleta", { x: 50, y: height - 50, size: 20, font });
+  page.drawText(ticketInfo.show, { x: 50, y: height - 80, size: 16, font });
+  page.drawText("Teatro del Embuste", {
+    x: 50,
+    y: height - 110,
+    size: 12,
+    font,
   });
-  const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: "networkidle0" });
-
-  const pdfBuffer = await page.pdf({
-    format: "A4",
-    printBackground: true,
+  page.drawText(`Nombre: ${ticketInfo.name}`, {
+    x: 50,
+    y: height - 140,
+    size: 12,
+    font,
+  });
+  page.drawText(`${ticketInfo.type}`, {
+    x: 50,
+    y: height - 160,
+    size: 12,
+    font,
+  });
+  page.drawText(`Fecha: ${ticketInfo.date}`, {
+    x: 50,
+    y: height - 180,
+    size: 12,
+    font,
+  });
+  page.drawText(`Hora: ${ticketInfo.time}`, {
+    x: 50,
+    y: height - 200,
+    size: 12,
+    font,
   });
 
-  await browser.close();
-  return pdfBuffer;
+  const qrImageBytes = Buffer.from(qrDataUrl.split(",")[1], "base64");
+  const qrImage = await pdfDoc.embedPng(qrImageBytes);
+  page.drawImage(qrImage, {
+    x: 100,
+    y: height - 400,
+    width: 200,
+    height: 200,
+  });
+
+  const pdfBytes = await pdfDoc.save();
+  return Buffer.from(pdfBytes);
 }
