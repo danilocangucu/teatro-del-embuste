@@ -3,7 +3,7 @@ import {
   getReservationItem,
   getReservationItems,
   updateReservationQuantityAndSeats,
-} from "@/services/ticketService";
+} from "@/services/reservationService";
 import { NextResponse } from "next/server";
 import { reservation_status } from "@prisma/client";
 import {

@@ -9,7 +9,7 @@ import {
   getReservation,
   getReservationItemsByReservationId,
   updateReservationStatus,
-} from "@/services/ticketService";
+} from "@/services/reservationService";
 import { UserOptions } from "@/components/Ticket/UserOptions";
 import { Stepper } from "@/components/shared/Stepper";
 import { reservation_status } from "@prisma/client";

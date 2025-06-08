@@ -10,7 +10,7 @@ import {
   getReservation,
   getReservationItemsByReservationId,
   updateReservationStatus,
-} from "@/services/ticketService";
+} from "@/services/reservationService";
 import { Stepper } from "@/components/shared/Stepper";
 import { Review } from "@/components/Ticket/Review";
 import { getUser } from "@/services/userService";

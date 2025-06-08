@@ -4,7 +4,7 @@ import {
   getReservationItemsByReservationId,
   updateReservationAndItemsTotalPrices,
   updateReservationStatus,
-} from "@/services/ticketService";
+} from "@/services/reservationService";
 import { DiscountDTO } from "@/types/Event";
 import { boldFeePercentage, boldFixedFee } from "@/utils/constants";
 import { getDiscountedPrice } from "@/utils/sharedUtils";

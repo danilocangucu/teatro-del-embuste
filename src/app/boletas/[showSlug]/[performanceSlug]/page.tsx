@@ -18,7 +18,7 @@ import {
   createReservation,
   createReservationItem,
   getReservationStatus,
-} from "@/services/ticketService";
+} from "@/services/reservationService";
 import { headers } from "next/headers";
 import {
   getReservationFromCookieViaHeaders,

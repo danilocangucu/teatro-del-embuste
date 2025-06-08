@@ -8,7 +8,7 @@ import {
   getPerformance,
 } from "@/services/performanceService";
 import { getShowSlugFromShowId } from "@/services/showService";
-import { getReservation } from "@/services/ticketService";
+import { getReservation } from "@/services/reservationService";
 import {
   formatDateTimeForURL,
   getISODate,

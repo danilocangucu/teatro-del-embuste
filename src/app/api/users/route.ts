@@ -1,5 +1,5 @@
 import { UserRegistrationSchema } from "@/lib/validators/user";
-import { updateReservationUserId } from "@/services/ticketService";
+import { updateReservationUserId } from "@/services/reservationService";
 import { createGuestUser, updateUser } from "@/services/userService";
 import { NextResponse } from "next/server";
 

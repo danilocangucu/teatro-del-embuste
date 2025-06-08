@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getReservation, getReservationItemsByReservationId } from "@/services/ticketService";
+import { getReservation, getReservationItemsByReservationId } from "@/services/reservationService";
 import { Stepper } from "@/components/shared/Stepper";
 import Pago from "@/components/Ticket/Pago";
 import { generateIntegritySignature, generatePaymentDescription } from "@/utils/ticketsUtils";

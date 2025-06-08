@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getReservation } from "@/services/ticketService";
+import { getReservation } from "@/services/reservationService";
 import { PollingReservation } from "@/components/Ticket/PollingReservation";
 import { Stepper } from "@/components/shared/Stepper";
 import { headers } from "next/headers";

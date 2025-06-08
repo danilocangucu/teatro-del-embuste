@@ -5,7 +5,7 @@ import { parsePerformanceSlug } from "@/utils/performanceUtils";
 import { getPerformanceFromEvent } from "@/services/performanceService";
 import { getReservationFromCookieViaHeaders } from "@/services/cookieService";
 import { headers } from "next/headers";
-import { getReservation } from "@/services/ticketService";
+import { getReservation } from "@/services/reservationService";
 import { Stepper } from "@/components/shared/Stepper";
 import { ResultComponent } from "@/components/Ticket/ResultComponent";
 import { reservation_status } from "@prisma/client";
