@@ -289,13 +289,27 @@ async function processWebhook(req: Request) {
       );
     }
 
+    const expandedReservationItems = validReservationItems.flatMap((item) =>
+      Array.from({ length: item.quantity }).map(() => ({
+        ...item,
+        quantity: 1, // each expanded item is just one ticket
+      }))
+    );
+
+    if (expandedReservationItems.length === 0) {
+      console.error("[Webhook] ❌ No expanded reservation items found", {
+        reservationId: reservation.id,
+      });
+      throw new Error("[Webhook] No expanded reservation items found");
+    }
+
     const ticketIdsAndTypes = await createTickets(
       performance.event_id,
       performance.id,
       reservation.id,
       user.id,
       user.email,
-      validReservationItems
+      expandedReservationItems
     );
 
     if (ticketIdsAndTypes.length === 1) {
