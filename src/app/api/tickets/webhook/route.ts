@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
-import { getReservation, updateReservationStatusAndPaymentId } from "@/services/ticketService";
+import {
+  getReservation,
+  getReservationItemsByReservationId,
+  updateReservationStatusAndPaymentId,
+} from "@/services/reservationService";
 import { reservation_status } from "@prisma/client";
-import { sendTicketEmail } from "@/services/emailService";
 import { getPerformanceByReservationId } from "@/services/performanceService";
 import { getISODate, getISOTime } from "@/utils/eventUtils";
 import { getShowTitleByEventId } from "@/services/showService";
 import { getUser } from "@/services/userService";
+import { createTickets } from "@/services/ticketService";
+import { sendTicketsEmail } from "@/services/emailService";
 
 // const BOLD_SECRET_KEY = process.env.BOLD_PRUEBA_LLAVE_SECRETA!;
 const BOLD_MERCHANT_ID = process.env.BOLD_MERCHANT_ID!;
@@ -259,24 +264,66 @@ async function processWebhook(req: Request) {
       throw new Error("[Webhook] User not found for confirmation email");
     }
 
+    const reservationItems = await getReservationItemsByReservationId(
+      reservation.id
+    );
+
+    if (!reservationItems || reservationItems.length === 0) {
+      console.error("[Webhook] ❌ No reservation items found", {
+        reservationId: reservation.id,
+      });
+      throw new Error("[Webhook] No reservation items found");
+    }
+
+    // TODO vm should be cleaning not valid reservation items from time to time
+    const validReservationItems = reservationItems.filter(
+      (item) => item.quantity > 0
+    );
+
+    if (validReservationItems.length === 0) {
+      console.error("[Webhook] ❌ No valid reservation items found", {
+        reservationId: reservation.id,
+      });
+      throw new Error(
+        "[Webhook] No valid reservation items for confirmation email"
+      );
+    }
+
+    const ticketIdsAndTypes = await createTickets(
+      performance.event_id,
+      performance.id,
+      reservation.id,
+      user.id,
+      user.email,
+      validReservationItems
+    );
+
+    if (ticketIdsAndTypes.length === 1) {
+      console.log(
+        "[Webhook] ✅ Ticket created with ID and type:",
+        ticketIdsAndTypes[0]
+      );
+    } else {
+      console.log(
+        "[Webhook] ✅ Tickets created with IDs and types:",
+        ticketIdsAndTypes
+      );
+    }
+
     console.log("[Webhook] 📧 Sending confirmation email...");
 
-    // TODO create tickets in the db according to the reservation
-    const ticketId = "1234abcd";
-
-    const sentTicketEmail = await sendTicketEmail({
-      email: user.email, // replace with real address for production
+    const sentTicketsEmail = await sendTicketsEmail({
+      email: user.email,
       fullName: user.full_name,
       showTitle,
-      ticketType: "Boleta: General / Estudiante",
       performanceDate: getISODate(performance.date),
       performanceTime: getISOTime(performance.time!),
-      qrText: `https://teatrodelembuste.com/boletas/qr?id=${ticketId}`,
+      ticketIdsAndTypes,
     });
 
-    if (!sentTicketEmail.success) {
+    if (!sentTicketsEmail.success) {
       console.error("[Webhook] ❌ Failed to send ticket email", {
-        error: sentTicketEmail.error,
+        error: sentTicketsEmail.error,
       });
       throw new Error("[Webhook] Failed to send ticket email");
     }
