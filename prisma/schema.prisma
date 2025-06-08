@@ -216,6 +216,7 @@ model events {
   event_pricings       event_pricings[]
   shows                shows                  @relation(fields: [show_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_events_show")
   performances         performances[]
+  tickets              tickets[]
 }
 
 model performances {
@@ -226,6 +227,7 @@ model performances {
   available_seats Int
   events          events         @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   reservations    reservations[]
+  tickets         tickets[]
 }
 
 model pricings {
@@ -245,22 +247,24 @@ model reservation_items {
   total_price    Int
   discounts      discounts?   @relation(fields: [discount_id], references: [id], onUpdate: NoAction, map: "fk_discount_id")
   reservations   reservations @relation(fields: [reservation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tickets        tickets[]
 }
 
 model reservations {
-  id                String              @id(map: "reservations_pkey1") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  performance_id    String              @db.Uuid
-  status            reservation_status
-  created_at        DateTime            @default(now()) @db.Timestamp(6)
-  expires_at        DateTime            @db.Timestamp(6)
-  user_id           String?             @db.Uuid
-  total_price       Int
-  bold_payment_id   String?             @db.VarChar(64)
-  ticket_total_price Int
-  bold_fee          Int
-  reservation_items reservation_items[]
-  performances      performances        @relation(fields: [performance_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reservations_performance_id_fkey1")
-  users             users[]
+  id                 String              @id(map: "reservations_pkey1") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  performance_id     String              @db.Uuid
+  status             reservation_status
+  created_at         DateTime            @default(now()) @db.Timestamp(6)
+  expires_at         DateTime            @db.Timestamp(6)
+  user_id            String?             @db.Uuid
+  total_price        Int
+  bold_payment_id    String?             @db.VarChar(64)
+  ticket_total_price Int                 @default(0)
+  bold_fee           Int                 @default(0)
+  reservation_items  reservation_items[]
+  performances       performances        @relation(fields: [performance_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reservations_performance_id_fkey1")
+  tickets            tickets[]
+  users              users[]
 }
 
 model categories {
@@ -285,9 +289,26 @@ model users {
   full_name      String        @db.VarChar(100)
   email          String        @db.VarChar(254)
   phone          String?       @db.VarChar(20)
+  tickets        tickets[]
   reservations   reservations? @relation(fields: [reservation_id], references: [id], onUpdate: NoAction)
 
   @@index([id], map: "fki_users_reservation_id_fkey")
+}
+
+model tickets {
+  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id            String            @db.Uuid
+  performance_id      String            @db.Uuid
+  reservation_id      String            @db.Uuid
+  reservation_item_id String            @db.Uuid
+  user_id             String?           @db.Uuid
+  user_email          String?           @db.VarChar(254)
+  ticket_type         ticket_type
+  events              events            @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  performances        performances      @relation(fields: [performance_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reservations        reservations      @relation(fields: [reservation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reservation_items   reservation_items @relation(fields: [reservation_item_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               users?            @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 }
 
 enum discount_rule_type {
