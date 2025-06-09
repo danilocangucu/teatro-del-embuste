@@ -31,3 +31,7 @@ export const zeptoMailFrom = {
   address: "notificaciones@teatrodelembuste.com",
   name: "Teatro del Embuste",
 };
+
+// JWT & COOKIES
+export const RESERVATION_COOKIE_KEY = "ticket-reservation";
+export const JWT_SECRET = process.env.JWT_SECRET!;
