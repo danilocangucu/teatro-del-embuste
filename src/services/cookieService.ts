@@ -1,11 +1,9 @@
-import { TicketType } from "@/types/Event";
 import { NextResponse } from "next/server";
+import { JwtPayload, SignOptions, sign, verify } from "jsonwebtoken";
 
-const RESERVATION_COOKIE_KEY = "ticket-reservation";
-
-function createReservationCookieKey(eventId: string, performanceId: string) {
-  return `${RESERVATION_COOKIE_KEY}-${eventId}-${performanceId}`;
-}
+import { TicketType } from "@/types/Event";
+import { decrypt, encrypt } from "@/utils/cryptoUtils";
+import { JWT_SECRET, RESERVATION_COOKIE_KEY } from "@/utils/constants";
 
 export function setReservationInCookie(
   response: NextResponse,
@@ -15,22 +13,38 @@ export function setReservationInCookie(
   expiresAt: Date,
   reservationItems: { id: string; ticketType: TicketType }[]
 ) {
-  const key = createReservationCookieKey(eventId, performanceId);
-  console.log("%%%%%%%%%%%%%%%");
-  console.log("setReservationInCookie – expiresAt", expiresAt);
-  console.log("%%%%%%%%%%%%%%%");
+  console.log("[setReservationInCookie] Starting to set reservation cookie");
+
+  const rawHandle = `${eventId}|${performanceId}`;
+  console.log("[setReservationInCookie] rawHandle:", rawHandle);
+
+  const encryptedHandle = encrypt(rawHandle);
+  console.log("[setReservationInCookie] encryptedHandle:", encryptedHandle);
+
+  // ✅ Encode the encrypted handle to make the cookie key safe
+  const encodedHandle = encodeURIComponent(encryptedHandle);
+  const key = `${RESERVATION_COOKIE_KEY}_${encodedHandle}`;
+  console.log("[setReservationInCookie] cookie key:", key);
 
   const data = {
     reservationId,
     reservationItems,
     expiresAt: new Date(expiresAt).toISOString(),
   };
+  console.log("[setReservationInCookie] data to sign:", data);
 
-  response.cookies.set(key, JSON.stringify(data), {
+  const token = sign(data, JWT_SECRET, {
+    algorithm: "HS256",
+  } satisfies SignOptions);
+  console.log("[setReservationInCookie] signed JWT token:", token);
+
+  response.cookies.set(key, token, {
     path: "/",
     httpOnly: true,
-    maxAge: 15 * 60,
+    maxAge: 15 * 60, // 15 minutes
   });
+
+  console.log("[setReservationInCookie] Cookie set successfully");
 }
 
 export function getReservationFromCookieViaHeaders(
@@ -40,28 +54,16 @@ export function getReservationFromCookieViaHeaders(
 ): {
   reservationId: string;
   reservationItems: { id: string; ticketType: TicketType }[];
-  expiresAt: Date
+  expiresAt: Date;
   userId: string | null;
 } | null {
-  const key = `${RESERVATION_COOKIE_KEY}-${eventId}-${performanceId}`;
-  console.log(
-    "🔍 [getReservationFromCookieViaHeaders] Looking for cookie with key:",
-    key
-  );
-
   const cookieHeader = reqHeaders.get("cookie");
-  console.log(
-    "🔍 [getReservationFromCookieViaHeaders] Raw Cookie Header:",
-    cookieHeader
-  );
-
   if (!cookieHeader) {
-    console.warn(
-      "⚠️ [getReservationFromCookieViaHeaders] No cookie header found"
-    );
+    console.warn("⚠️ No cookie header found");
     return null;
   }
 
+  // Parse cookies into a map
   const cookiesMap = Object.fromEntries(
     cookieHeader.split(";").map((c) => {
       const [k, ...v] = c.trim().split("=");
@@ -69,52 +71,63 @@ export function getReservationFromCookieViaHeaders(
     })
   );
 
-  console.log(
-    "🗺️ [getReservationFromCookieViaHeaders] Parsed cookies map:",
-    cookiesMap
-  );
+  const matchingCookieEntry = Object.entries(cookiesMap).find(([key]) => {
+    if (!key.startsWith(RESERVATION_COOKIE_KEY + "_")) return false;
 
-  const raw = cookiesMap[key];
+    // Decode the URI component before decrypting
+    const encryptedHandle = decodeURIComponent(
+      key.substring(RESERVATION_COOKIE_KEY.length + 1)
+    );
 
-  if (!raw) {
+    try {
+      const decryptedHandle = decrypt(encryptedHandle);
+      const [decryptedEventId, decryptedPerformanceId] =
+        decryptedHandle.split("|");
+      return (
+        decryptedEventId === eventId && decryptedPerformanceId === performanceId
+      );
+    } catch (error) {
+      console.warn(`⚠️ Failed to decrypt cookie key: ${key}`, error);
+      return false;
+    }
+  });
+
+  if (!matchingCookieEntry) {
     console.warn(
-      "⚠️ [getReservationFromCookieViaHeaders] Cookie not found for key:",
-      key
+      `⚠️ No matching cookie found for eventId=${eventId}, performanceId=${performanceId}`
     );
     return null;
   }
 
-  console.log("📦 [getReservationFromCookieViaHeaders] Raw cookie value:", raw);
+  const [, token] = matchingCookieEntry;
+  if (!token) {
+    console.warn("⚠️ No token found in matching cookie entry");
+    return null;
+  }
 
   try {
-    const parsed = JSON.parse(raw);
-    console.log(
-      "✅ [getReservationFromCookieViaHeaders] Parsed cookie data:",
-      parsed
-    );
+    const decoded = verify(token, JWT_SECRET) as JwtPayload;
 
     if (
-      !parsed.reservationId ||
-      !Array.isArray(parsed.reservationItems) ||
-      !parsed.expiresAt
+      !decoded.reservationId ||
+      !Array.isArray(decoded.reservationItems) ||
+      !decoded.expiresAt
     ) {
-      console.warn(
-        "⚠️ [getReservationFromCookieViaHeaders] Invalid cookie structure"
-      );
+      console.warn("⚠️ Invalid JWT payload structure");
       return null;
     }
 
     return {
-      reservationId: parsed.reservationId,
-      reservationItems: parsed.reservationItems,
-      userId: parsed.userId || null,
-      expiresAt: new Date(parsed.expiresAt),
+      reservationId: decoded.reservationId as string,
+      reservationItems: decoded.reservationItems as {
+        id: string;
+        ticketType: TicketType;
+      }[],
+      userId: (decoded.userId as string) || null,
+      expiresAt: new Date(decoded.expiresAt as string),
     };
   } catch (err) {
-    console.warn(
-      "❌ [getReservationFromCookieViaHeaders] Failed to parse reservation cookie",
-      err
-    );
+    console.warn("❌ Failed to verify or decode JWT token", err);
     return null;
   }
 }
