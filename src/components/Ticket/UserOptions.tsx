@@ -8,7 +8,7 @@ import { GuestForm } from "./Forms/GuestForm";
 // TODO UserOptions showSlug and performanceSlug can come from query params
 // TODO user type in UserOptions
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function UserOptions({ reservationId, eventId, performanceId, showSlug, performanceSlug, user }: { reservationId: string, eventId: string, performanceId: string, showSlug: string, performanceSlug: string, user: any }) {
+export function UserOptions({ eventId, performanceId, showSlug, performanceSlug, user }: { eventId: string, performanceId: string, showSlug: string, performanceSlug: string, user: any }) {
   const [selected, setSelected] = useState<"login" | "create" | "guest">(
     "guest"
   );  
@@ -83,7 +83,6 @@ export function UserOptions({ reservationId, eventId, performanceId, showSlug, p
             la función, será eliminada automáticamente.
           </p>
           <GuestForm
-            reservationId={reservationId}
             eventId={eventId}
             performanceId={performanceId}
             showSlug={showSlug}
