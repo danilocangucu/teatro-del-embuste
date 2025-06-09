@@ -200,7 +200,7 @@ export default async function IdentidadPage({
         expiresAt={reservationFromDB.expires_at}
         timeNow={now}
       />
-      <UserOptions reservationId={reservationFromCookie.reservationId} eventId={event.id} performanceId={performance.id} showSlug={showSlug} performanceSlug={performanceSlug} user={user} />
+      <UserOptions eventId={event.id} performanceId={performance.id} showSlug={showSlug} performanceSlug={performanceSlug} user={user} />
     </>
   );
 }
