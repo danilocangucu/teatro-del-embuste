@@ -195,3 +195,16 @@ export const getShowTitleByEventId = async (eventId: string) => {
 
   return show.title;
 };
+
+export const getShowIdByShowSlug = async (showSlug: string) => {
+  const show = await prisma.shows.findUnique({
+    where: { slug: showSlug },
+    select: { id: true },
+  });
+
+  if (!show) {
+    throw new Error("Show not found for the given slug");
+  }
+
+  return show.id;
+};
