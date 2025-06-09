@@ -1,5 +1,5 @@
 export const patchUser = async (
-  userId: string,
+  slugs: { showSlug: string; performanceSlug: string },
   currentData: { full_name?: string; email?: string; phone?: string },
   newData: { fullName: string; email: string; phone?: string }
 ) => {
@@ -24,9 +24,11 @@ export const patchUser = async (
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify({
-      userId,
       ...updates,
+      showSlug: slugs.showSlug,
+      performanceSlug: slugs.performanceSlug,
     }),
   });
 
