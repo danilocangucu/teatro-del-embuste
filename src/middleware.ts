@@ -47,6 +47,7 @@ function isKnownPath(pathname: string) {
   });
 }
 
+// TODO its not really tracking properly. attempts to, for example, /wp-admin/** and /wordpress/** are not being logged as unknown
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   console.log(`🧪 Middleware triggered for path: ${pathname}`);
