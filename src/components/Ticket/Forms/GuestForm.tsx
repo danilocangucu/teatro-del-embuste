@@ -9,13 +9,11 @@ import { useTopLoader } from "nextjs-toploader";
 import { patchUser } from "@/utils/userUtils";
 
 interface GuestFormProps {
-  reservationId: string;
   eventId: string;
   performanceId: string;
   showSlug: string;
   performanceSlug: string;
   user?: {
-    id: string;
     full_name: string;
     email: string;
     phone: string;
@@ -23,9 +21,6 @@ interface GuestFormProps {
 }
 
 export function GuestForm({
-  reservationId,
-  eventId,
-  performanceId,
   showSlug,
   performanceSlug,
   user,
@@ -79,7 +74,7 @@ export function GuestForm({
     try {
       if (user) {
         const patchResult = await patchUser(
-          user.id,
+          { showSlug, performanceSlug },
           { full_name: user.full_name, email: user.email, phone: user.phone },
           { fullName: data.fullName, email: data.email, phone: data.phone }
         );
@@ -97,31 +92,22 @@ export function GuestForm({
         const res = await fetch("/api/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             fullName: data.fullName,
             email: data.email,
             phone: data.phone,
             isGuest: true,
-            reservationId: reservationId,
+            showSlug,
+            performanceSlug,
           }),
         });
 
         const json = await res.json();
+        console.log("📨 Response from /api/users:", json);
+
         if (json.success) {
-          const updateRes = await fetch("/api/tickets/reservations", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              eventId,
-              performanceId,
-              userId: json.userId,
-            }),
-          });
-
-          if (!updateRes.ok) {
-            throw new Error("Failed to update reservation cookie");
-          }
-
+          console.log("👤 Usuario creado exitosamente");
           router.push(`/boletas/${showSlug}/${performanceSlug}/revision`);
           return;
         } else {
@@ -141,7 +127,7 @@ export function GuestForm({
     setIsGoingBack(true);
     if (user) {
       const patchResult = await patchUser(
-        user.id,
+        { showSlug, performanceSlug },
         { full_name: user.full_name, email: user.email, phone: user.phone },
         { fullName: data.fullName, email: data.email, phone: data.phone }
       );
