@@ -172,27 +172,30 @@ export const updateReservationAndItemsTotalPrices = async (
   boldFee: number,
   totalPrice: number
 ) => {
-  return prisma.$transaction(async (tx) => {
-    const updatedItems = await Promise.all(
-      items.map((item) =>
-        tx.reservation_items.update({
-          where: { id: item.id },
-          data: { total_price: item.total_price },
-        })
-      )
-    );
+  return prisma.$transaction(
+    async (tx) => {
+      const updatedItems = await Promise.all(
+        items.map((item) =>
+          tx.reservation_items.update({
+            where: { id: item.id },
+            data: { total_price: item.total_price },
+          })
+        )
+      );
 
-    const updatedReservation = await tx.reservations.update({
-      where: { id: reservationId },
-      data: {
-        total_price: totalPrice,
-        ticket_total_price: ticketTotalPrice,
-        bold_fee: boldFee,
-      },
-    });
+      const updatedReservation = await tx.reservations.update({
+        where: { id: reservationId },
+        data: {
+          total_price: totalPrice,
+          ticket_total_price: ticketTotalPrice,
+          bold_fee: boldFee,
+        },
+      });
 
-    return { updatedItems, updatedReservation };
-  });
+      return { updatedItems, updatedReservation };
+    },
+    { timeout: 10000 }
+  ); // TODO inspect with more detail temporary 10 seconds timeout for the transaction
 };
 
 export const updateReservationStatusAndPaymentId = async (
