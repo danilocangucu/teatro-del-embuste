@@ -165,7 +165,12 @@ export async function PUT(req: Request) {
 
   const totalPrice = ticketTotalPrice + boldFee;
 
-  // Perform all updates in a single transaction
+  // TODO inspect timing with more detail
+  console.log(
+    "[updateReservationAndItemsTotalPrices] started at",
+    new Date().toISOString()
+  );
+
   const { updatedItems, updatedReservation } =
     await updateReservationAndItemsTotalPrices(
       reservationId,
@@ -174,6 +179,11 @@ export async function PUT(req: Request) {
       boldFee,
       totalPrice
     );
+
+  console.log(
+    "[updateReservationAndItemsTotalPrices] finished at",
+    new Date().toISOString()
+  );
 
   console.log("Updated reservation items:", updatedItems);
   console.log("Updated reservation:", updatedReservation);
