@@ -109,6 +109,19 @@ export default async function PerformancePage({
     console.log("existingReservation fetched");
 
     if (existingReservation) {
+      const reservationStatusInDB = await getReservationStatus(existingReservation.reservationId);
+
+      // TODO if confirmed, expired or cancelled, should delete the cookie and reload the page to create a new & empty reservation
+      if (
+        reservationStatusInDB === reservation_status.confirmed ||
+        reservationStatusInDB === reservation_status.expired ||
+        reservationStatusInDB === reservation_status.cancelled) {
+        console.error(
+          "Reservation creation failed: Existing reservation is already confirmed, expired, or cancelled."
+        );
+        return notFound();
+      }
+
       reservationId = existingReservation.reservationId;
       reservationItems = existingReservation.reservationItems;
       timeNow = getServersTimeNow();
