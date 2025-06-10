@@ -19,7 +19,6 @@ export default async function ConfirmacionPage({
 
   console.log("Starting ConfirmacionPage for:", { showSlug, performanceSlug });
 
-  // Fetch show and event info
   let showId: string;
   try {
     ({ showId } = await getShowIdAndTitle(showSlug));
@@ -38,7 +37,6 @@ export default async function ConfirmacionPage({
     notFound();
   }
 
-  // Parse performance slug
   const { performanceDate, performanceTime } =
     parsePerformanceSlug(performanceSlug);
   console.log("[CONFIRMACION] Parsed performance slug:", {
@@ -46,7 +44,6 @@ export default async function ConfirmacionPage({
     performanceTime,
   });
 
-  // Get performance
   let performance;
   try {
     performance = await getPerformanceFromEvent(
@@ -69,7 +66,6 @@ export default async function ConfirmacionPage({
     notFound();
   }
 
-  // Get reservation from cookie
   const reqHeaders = await headers();
   console.log("[CONFIRMACION] Request headers obtained");
   const reservationFromCookie = getReservationFromCookieViaHeaders(
@@ -82,8 +78,6 @@ export default async function ConfirmacionPage({
     notFound();
   }
   console.log("[CONFIRMACION] Reservation from cookie:", reservationFromCookie);
-
-  // TODO verification should check if expiresAt is still valid
 
   const reservation = await getReservation(reservationFromCookie.reservationId);
 
@@ -107,7 +101,7 @@ export default async function ConfirmacionPage({
   return (
     <>
       <Stepper currentStep="Confirmación" />
-      <ResultComponent reservation={reservation} eventId={event.id} performanceId={performance.id} />
+      <ResultComponent reservation={reservation} showSlug={showSlug} performanceSlug={performanceSlug} />
     </>
   );
 }

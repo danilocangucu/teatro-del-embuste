@@ -4,17 +4,18 @@ import { reservation_status } from "@prisma/client";
 import { useEffect } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function ResultComponent({ reservation, eventId, performanceId }: { reservation: any, eventId: string, performanceId: string }) {
+export function ResultComponent({ reservation, showSlug, performanceSlug }: { reservation: any, showSlug: string, performanceSlug: string }) {
   useEffect(() => {
-    if (!eventId || !performanceId) return;
+    if (!showSlug || !performanceSlug) return;
 
     const deleteReservation = async () => {
       try {
-        const resDelete = await fetch("/api/tickets/reservations", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventId, performanceId }),
-        });
+        const resDelete = await fetch(
+          `/api/tickets/reservations?showSlug=${showSlug}&performanceSlug=${performanceSlug}`,
+          {
+            method: "DELETE",
+          }
+        );
 
         if (!resDelete.ok) {
           console.error(
@@ -33,7 +34,7 @@ export function ResultComponent({ reservation, eventId, performanceId }: { reser
     };
 
     deleteReservation();
-  }, [eventId, performanceId]);
+  }, [showSlug, performanceSlug]);
 
   if (!reservation) {
     return (

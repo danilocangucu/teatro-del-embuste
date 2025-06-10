@@ -16,6 +16,10 @@ import {
 } from "@/utils/eventUtils";
 import { reservation_status } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { getEventAndPerformanceIdsFromSlugs } from "@/utils/reservationUtils";
+import { RESERVATION_COOKIE_KEY } from "@/utils/constants";
+import { decrypt } from "@/utils/cryptoUtils";
 
 export async function POST(req: Request) {
   const { eventId, performanceId, reservationId, expiresAt, reservationItems } =
@@ -199,15 +203,104 @@ export async function GET(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const { eventId, performanceId } = await req.json();
+  const reqHeaders = await headers();
 
-  const key = `ticket-reservation-${eventId}-${performanceId}`;
-  const response = NextResponse.json({ success: true });
+  console.log("💨 [/api/users DELETE] Incoming request to remove cookie");
 
-  response.cookies.set(key, "", {
-    path: "/",
-    maxAge: 0,
+  const { searchParams } = new URL(req.url);
+  const showSlug = searchParams.get("showSlug");
+  const performanceSlug = searchParams.get("performanceSlug");
+
+  if (!showSlug || !performanceSlug) {
+    console.warn("🚫 Missing slugs: showSlug or performanceSlug is undefined");
+    return NextResponse.json(
+      { success: false, error: "Missing show or performance slug" },
+      { status: 400 }
+    );
+  }
+
+  const result = await getEventAndPerformanceIdsFromSlugs(
+    showSlug,
+    performanceSlug
+  );
+
+  if (!result) {
+    console.error("❌ Failed to resolve slugs for:", showSlug, performanceSlug);
+    return NextResponse.json(
+      { success: false, error: "Invalid show or performance slug" },
+      { status: 400 }
+    );
+  }
+
+  const { eventId, performanceId } = result;
+  console.log("🔗 Resolved event and performance IDs:", {
+    eventId,
+    performanceId,
   });
 
-  return response;
+  const cookieHeader = reqHeaders.get("cookie");
+  if (!cookieHeader) {
+    console.warn("⚠️ No cookie header found to delete from");
+    return NextResponse.json(
+      { success: false, error: "No cookie header found" },
+      { status: 400 }
+    );
+  }
+
+  const cookiesMap = Object.fromEntries(
+    cookieHeader.split(";").map((c) => {
+      const [k, ...v] = c.trim().split("=");
+      return [k, decodeURIComponent(v.join("="))];
+    })
+  );
+
+  let cookieNameToRemove: string | null = null;
+  const cookiePath: string = "/";
+
+  for (const [key] of Object.entries(cookiesMap)) {
+    if (!key.startsWith(RESERVATION_COOKIE_KEY + "_")) continue;
+
+    const encryptedHandle = decodeURIComponent(
+      key.substring(RESERVATION_COOKIE_KEY.length + 1)
+    );
+
+    try {
+      const decrypted = decrypt(encryptedHandle);
+      const [cookieEventId, cookiePerformanceId] = decrypted.split("|");
+
+      if (cookieEventId === eventId && cookiePerformanceId === performanceId) {
+        cookieNameToRemove = key;
+        break;
+      }
+    } catch (error) {
+      console.warn(
+        "🔐 Failed to decrypt a reservation cookie during scan:",
+        error
+      );
+    }
+  }
+
+  if (cookieNameToRemove) {
+    console.log(`🗑️ Attempting to delete cookie: ${cookieNameToRemove}`);
+
+    const response = NextResponse.json({ success: true });
+
+    response.cookies.set(cookieNameToRemove, "", {
+      path: cookiePath,
+      maxAge: 0,
+      expires: new Date(0),
+      httpOnly: true,
+    });
+
+    console.log(
+      `✅ Cookie (${cookieNameToRemove}) deleted successfully via response.cookies.set`
+    );
+    return response;
+  } else {
+    console.warn("🍪 Matching reservation cookie not found for deletion");
+    return NextResponse.json(
+      { success: false, error: "Matching reservation cookie not found" },
+      { status: 404 }
+    );
+  }
 }
