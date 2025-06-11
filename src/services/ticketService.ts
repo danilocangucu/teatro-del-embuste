@@ -29,3 +29,9 @@ export const createTickets = async (
     type: ticket.ticket_type,
   }));
 };
+
+export const getTicketById = async (ticketId: string) => {
+  return prisma.tickets.findUnique({
+    where: { id: ticketId },
+  });
+};
