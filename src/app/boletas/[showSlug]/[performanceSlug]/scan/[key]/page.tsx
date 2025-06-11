@@ -11,7 +11,7 @@ import TicketValidator from '@/components/Ticket/TicketValidator';
 export default async function TicketValidatorPage({
   params,
 }: {
-  params: { showSlug: string; performanceSlug: string; key: string };
+        params: Promise<{ showSlug: string; performanceSlug: string; key: string }>;
 }) {
   const { showSlug, performanceSlug, key } = await params;
 
